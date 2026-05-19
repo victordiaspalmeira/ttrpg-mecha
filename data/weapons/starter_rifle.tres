@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://starter_rifle01"]
+
+[ext_resource type="Script" uid="uid://p3qe5vg4cf35" path="res://scripts/data/weapon_data.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+weapon_id = "starter_rifle"
+weapon_name = "Starter Rifle"
+weapon_damage = 3
+weapon_range = 3
+attack_ap_cost = 2

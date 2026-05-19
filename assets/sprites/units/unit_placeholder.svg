@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="96" viewBox="0 0 64 96">
+  <!-- Simple mech silhouette placeholder (2.5D billboard) -->
+  <ellipse cx="32" cy="90" rx="18" ry="4" fill="#1a1f28" opacity="0.35"/>
+  <path d="M22 88 L18 72 L14 48 L20 44 L24 28 L28 14 L36 10 L44 14 L48 28 L52 44 L58 48 L54 72 L50 88 Z" fill="#8a96a8"/>
+  <rect x="26" y="30" width="12" height="10" rx="2" fill="#6b7588"/>
+  <path d="M12 46 L6 40 L10 34 L18 42 Z" fill="#7d8899"/>
+  <path d="M52 46 L58 40 L54 34 L46 42 Z" fill="#7d8899"/>
+  <rect x="24" y="52" width="16" height="22" rx="3" fill="#9aa5b8"/>
+  <rect x="28" y="8" width="8" height="10" rx="2" fill="#b8c4d4"/>
+</svg>

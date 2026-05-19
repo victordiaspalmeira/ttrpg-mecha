@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3 uid="uid://biblg1dbmtgpk"]
+
+[ext_resource type="Script" uid="uid://cdjoedf3qgkn2" path="res://scripts/data/encounter_data.gd" id="1_enc"]
+[ext_resource type="Script" uid="uid://cm5j4x40fy4u2" path="res://scripts/data/encounter_spawn.gd" id="2_spawn"]
+[ext_resource type="Resource" uid="uid://b52ehkibvbjjc" path="res://data/classes/frost_class.tres" id="3_frost"]
+[ext_resource type="Resource" uid="uid://v0n2bf1lj2b5" path="res://data/classes/ember_class.tres" id="4_ember"]
+
+[sub_resource type="Resource" id="spawn_player"]
+script = ExtResource("2_spawn")
+class_data = ExtResource("3_frost")
+
+[sub_resource type="Resource" id="spawn_enemy"]
+script = ExtResource("2_spawn")
+class_data = ExtResource("4_ember")
+team = "enemy"
+q = 4
+r = -2
+
+[resource]
+script = ExtResource("1_enc")
+encounter_id = "test_skirmish"
+display_name = "Test Skirmish"
+grid_radius = 5
+spawns = Array[ExtResource("2_spawn")]([SubResource("spawn_player"), SubResource("spawn_enemy")])

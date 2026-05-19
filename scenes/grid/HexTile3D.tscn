@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://cwl2q4wwq10yk"]
+
+[ext_resource type="Script" uid="uid://din1igk3xwswn" path="res://scripts/components/hex_tile.gd" id="1_1vbpl"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_body"]
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.2
+radial_segments = 6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_overlay"]
+top_radius = 0.92
+bottom_radius = 0.92
+height = 0.04
+radial_segments = 6
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1vbpl"]
+height = 0.2
+radius = 1.0
+
+[node name="HexTile3d" type="Node3D"]
+script = ExtResource("1_1vbpl")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_body")
+
+[node name="HighlightOverlay" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("CylinderMesh_overlay")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("CylinderShape3D_1vbpl")

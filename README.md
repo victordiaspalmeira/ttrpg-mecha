@@ -2,6 +2,8 @@
 
 Small-scale tactical mech RPG made with Godot 4.
 
+**Contributing / AI agents:** read [PROJECT_RULES.md](PROJECT_RULES.md) for folder layout, battle wiring, and required patterns before changing battle or UI code.
+
 ## Core Pillars
 - Hex-based tactical combat
 - AP-driven actions

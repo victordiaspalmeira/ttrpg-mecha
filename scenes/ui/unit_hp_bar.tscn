@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://duia12i8tcwgx"]
+
+[ext_resource type="Script" uid="uid://cwvel7bhxadpx" path="res://scripts/ui/unit_hp_bar.gd" id="1_qmm48"]
+
+[node name="UnitHpBar" type="Sprite3D" unique_id=1042041707]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
+billboard = 2
+script = ExtResource("1_qmm48")

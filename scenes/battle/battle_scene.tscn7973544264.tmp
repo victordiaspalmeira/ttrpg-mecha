@@ -1,0 +1,310 @@
+[gd_scene format=3 uid="uid://rnvmwxwg1gj6"]
+
+[ext_resource type="PackedScene" uid="uid://cwl2q4wwq10yk" path="res://scenes/grid/HexTile3D.tscn" id="1_3hov6"]
+[ext_resource type="Script" uid="uid://cf64jr78ejp6m" path="res://scripts/grid/grid_manager.gd" id="1_grid"]
+[ext_resource type="PackedScene" uid="uid://bxaf8sg4b8btq" path="res://scenes/units/unit_base.tscn" id="2_unit"]
+[ext_resource type="Script" uid="uid://c6tk4442fbsj0" path="res://scripts/battle/battle_flow.gd" id="3_flow"]
+[ext_resource type="Script" uid="uid://70j77mfw2bul" path="res://scripts/battle/selection_state.gd" id="4_sel"]
+[ext_resource type="Script" uid="uid://5tn5sy8qt1fv" path="res://scripts/battle/turn_controller.gd" id="5_turn"]
+[ext_resource type="Script" uid="uid://dcdcp2dld8pqh" path="res://scripts/battle/combat_resolver.gd" id="6_combat"]
+[ext_resource type="Script" uid="uid://8rrgjf5yxn6a" path="res://scripts/presentation/battle_hud.gd" id="7_hud"]
+[ext_resource type="Script" uid="uid://d2sl8vbceaglp" path="res://scripts/presentation/grid_highlights.gd" id="8_hi"]
+[ext_resource type="PackedScene" uid="uid://duia12i8tcwgx" path="res://scenes/ui/unit_hp_bar.tscn" id="9_hp"]
+[ext_resource type="PackedScene" uid="uid://c1oi1ncfwqfet" path="res://scenes/ui/turnOrderItem.tscn" id="10_to"]
+[ext_resource type="PackedScene" uid="uid://dq3rudcty2ua3" path="res://scenes/ui/damage_popup.tscn" id="11_dmg"]
+[ext_resource type="Script" uid="uid://dwggsg8dywqoa" path="res://scripts/units/unit_spawner.gd" id="12_spawn"]
+[ext_resource type="Script" uid="uid://b6mhb1ova5orl" path="res://scripts/battle/battle_input.gd" id="13_input"]
+[ext_resource type="Script" uid="uid://ci3hqhwh1fa21" path="res://scripts/core/camera_controller.gd" id="14_cam"]
+[ext_resource type="Resource" uid="uid://biblg1dbmtgpk" path="res://data/encounters/test_skirmish.tres" id="15_enc"]
+[ext_resource type="Script" uid="uid://cp8hu7o8ylerc" path="res://scripts/battle/enemy_brain.gd" id="16_brain"]
+[ext_resource type="PackedScene" path="res://scenes/ui/turn_announce.tscn" id="17_announce"]
+[ext_resource type="Resource" path="res://data/ai/simple_chase_behavior.tres" id="18_ai"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.1, 0.12, 0.16, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.28, 0.38, 0.52, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.09, 0.11, 0.15, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.45, 0.58, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_turnbar"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.08, 0.1, 0.13, 0.88)
+border_width_bottom = 2
+border_color = Color(0.25, 0.35, 0.5, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_xg3oh"]
+size = Vector2(10, 10)
+
+[node name="BattleScene" type="Node3D" unique_id=1382040613]
+
+[node name="BattleSession" type="Node" parent="." unique_id=1271294376]
+unique_name_in_owner = true
+
+[node name="SelectionState" type="Node" parent="BattleSession" unique_id=481845724]
+unique_name_in_owner = true
+script = ExtResource("4_sel")
+
+[node name="TurnController" type="Node" parent="BattleSession" unique_id=1998308204]
+unique_name_in_owner = true
+script = ExtResource("5_turn")
+
+[node name="CombatResolver" type="Node" parent="BattleSession" unique_id=2101142656]
+unique_name_in_owner = true
+script = ExtResource("6_combat")
+
+[node name="BattleHud" type="Node" parent="BattleSession" unique_id=1196368394]
+unique_name_in_owner = true
+script = ExtResource("7_hud")
+unit_hp_bar_scene = ExtResource("9_hp")
+turn_order_item_scene = ExtResource("10_to")
+damage_popup_scene = ExtResource("11_dmg")
+
+[node name="GridHighlights" type="Node" parent="BattleSession" unique_id=836347670]
+unique_name_in_owner = true
+script = ExtResource("8_hi")
+
+[node name="UnitSpawner" type="Node" parent="BattleSession" unique_id=1510289477]
+unique_name_in_owner = true
+script = ExtResource("12_spawn")
+mech_unit_scene = ExtResource("2_unit")
+
+[node name="BattleInput" type="Node" parent="BattleSession" unique_id=1238538253]
+unique_name_in_owner = true
+script = ExtResource("13_input")
+
+[node name="EnemyBrain" type="Node" parent="BattleSession" unique_id=1332940426]
+unique_name_in_owner = true
+script = ExtResource("16_brain")
+default_behavior = ExtResource("18_ai")
+
+[node name="BattleFlow" type="Node" parent="BattleSession" unique_id=412576681]
+unique_name_in_owner = true
+script = ExtResource("3_flow")
+encounter = ExtResource("15_enc")
+
+[node name="World" type="Node3D" parent="." unique_id=1957219608]
+unique_name_in_owner = true
+
+[node name="GridManager" type="Node3D" parent="World" unique_id=1906012570]
+unique_name_in_owner = true
+script = ExtResource("1_grid")
+hex_tile_scene = ExtResource("1_3hov6")
+
+[node name="Units" type="Node3D" parent="World" unique_id=2127420835]
+unique_name_in_owner = true
+
+[node name="CameraRig" type="Node3D" parent="World" unique_id=100866248]
+transform = Transform3D(0.70710677, 0.49999997, 0.49999997, 0, 0.70710677, -0.70710677, -0.70710677, 0.49999997, 0.49999997, 0, 0, 0)
+script = ExtResource("14_cam")
+
+[node name="CameraPitch" type="Node3D" parent="World/CameraRig" unique_id=126459997]
+
+[node name="Camera3D" type="Camera3D" parent="World/CameraRig/CameraPitch" unique_id=821687330]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.4226182, 0.9063078, 0, -0.90630776, 0.42261827, 0, 11.999998, 7.999999)
+current = true
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1623107552]
+unique_name_in_owner = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="UI" unique_id=820132791]
+
+[node name="TurnAnnounce" parent="UI/CanvasLayer" unique_id=190469120 instance=ExtResource("17_announce")]
+unique_name_in_owner = true
+
+[node name="ActionPanel" type="PanelContainer" parent="UI/CanvasLayer" unique_id=256974855]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -210.0
+offset_right = 168.0
+offset_bottom = -12.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_action")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/CanvasLayer/ActionPanel" unique_id=707893013]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HeaderLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=319635493]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "ACTIONS"
+
+[node name="ActionLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=1721938961]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.93, 0.97, 1)
+theme_override_font_sizes/font_size = 14
+text = "Mode · Idle"
+
+[node name="HintLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=1023076127]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.6, 0.68, 1)
+theme_override_font_sizes/font_size = 11
+text = "Move, attack, then end turn."
+autowrap_mode = 2
+
+[node name="ResourcesHBox" type="HBoxContainer" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=1491299511]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MovementLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer/ResourcesHBox" unique_id=2006111318]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "MOV  —"
+
+[node name="APLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer/ResourcesHBox" unique_id=171591269]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.55, 1)
+theme_override_font_sizes/font_size = 13
+text = "AP  —"
+
+[node name="MoveButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=609813641]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Move"
+
+[node name="AttackButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=1329750766]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Attack"
+
+[node name="EndTurnButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=1244775787]
+unique_name_in_owner = true
+layout_mode = 2
+text = "End Turn"
+
+[node name="HoverInfoPanel" type="PanelContainer" parent="UI/CanvasLayer" unique_id=1298496834]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(200, 0)
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -212.0
+offset_top = -200.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_hover")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/CanvasLayer/HoverInfoPanel" unique_id=20491210]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Portrait" type="TextureRect" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=178834462]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=147980464]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="HPLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=651444434]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.88, 1)
+
+[node name="MovementHoverLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1522914052]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="APHoverLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1642040620]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AttackLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1528146654]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RangeLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=605858866]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TurnOrderBar" type="PanelContainer" parent="UI/CanvasLayer" unique_id=860254711]
+unique_name_in_owner = true
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 72.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_turnbar")
+
+[node name="VBox" type="VBoxContainer" parent="UI/CanvasLayer/TurnOrderBar" unique_id=644305040]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TurnOrderTitle" type="Label" parent="UI/CanvasLayer/TurnOrderBar/VBox" unique_id=1714857792]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.62, 0.78, 1)
+theme_override_font_sizes/font_size = 11
+text = "TURN ORDER"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/CanvasLayer/TurnOrderBar/VBox" unique_id=425225647]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DamagePopupContainer" type="Control" parent="UI/CanvasLayer" unique_id=861093309]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="UnitUIContainer" type="Control" parent="UI" unique_id=174357450]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+
+[node name="VFX" type="Node3D" parent="." unique_id=374770013]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1928291547]
+transform = Transform3D(0.8660254, -0.43301272, 0.24999999, 0, 0.49999997, 0.86602545, -0.5, -0.75, 0.43301266, 0, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=954143301]
+mesh = SubResource("PlaneMesh_xg3oh")
