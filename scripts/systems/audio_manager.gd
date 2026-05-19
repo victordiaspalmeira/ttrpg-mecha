@@ -8,6 +8,8 @@ extends Node
 @onready var sfx_hit: AudioStreamPlayer = %AudioHit
 @onready var sfx_death: AudioStreamPlayer = %AudioDeath
 @onready var sfx_end_turn: AudioStreamPlayer = %AudioEndTurn
+@onready var sfx_ui_hover: AudioStreamPlayer = %AudioUIHover
+@onready var sfx_ui_click: AudioStreamPlayer = %AudioUIClick
 
 var _combat_resolver: CombatResolver = null
 var _turn_controller: TurnController = null
@@ -55,12 +57,25 @@ func play_death() -> void:
 func play_end_turn() -> void:
 	_play(sfx_end_turn)
 
+func play_ui_hover() -> void:
+	_play(sfx_ui_hover)
+
+func play_ui_click() -> void:
+	_play(sfx_ui_click)
 
 func _play(player: AudioStreamPlayer) -> void:
+	if not player:
+		return
 
-	if player and player.stream:
-		player.volume_db = sfx_volume
-		player.play()
+	if not player.stream:
+		return
+
+	player.volume_db = sfx_volume
+
+	if player.playing:
+		player.stop()
+
+	player.play()
 
 
 func _on_attack_executed(_attacker: UnitBase, _target: UnitBase) -> void:
