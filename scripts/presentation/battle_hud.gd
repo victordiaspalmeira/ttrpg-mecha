@@ -33,6 +33,9 @@ extends Node
 @onready var range_label: Label = %RangeLabel
 @onready var turn_order_container: HBoxContainer = %HBoxContainer
 @onready var damage_popup_container: Control = %DamagePopupContainer
+@onready var camera_controller = (
+	%CameraRig
+)
 
 const COLOR_MODE_ON := Color(0.55, 0.85, 1.0, 1.0)
 const COLOR_MODE_OFF := Color(0.92, 0.94, 0.96, 1.0)
@@ -110,6 +113,7 @@ func present_turn_start(unit: UnitBase) -> void:
 		return
 
 	_display_unit = unit
+	camera_controller.focus_on_unit(unit)
 	update_resource_display(unit)
 	_highlight_turn_order(unit)
 	_update_player_controls(unit)

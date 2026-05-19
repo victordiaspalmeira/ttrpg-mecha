@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="SimpleChaseBehavior" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="SimpleChaseBehavior" format=3 uid="uid://cawuehlu7x2sh"]
 
-[ext_resource type="Script" path="res://scripts/battle/ai/simple_chase_behavior.gd" id="1"]
+[ext_resource type="Script" uid="uid://disyi8m4e6ip4" path="res://scripts/battle/ai/simple_chase_behavior.gd" id="1"]
 
 [resource]
 script = ExtResource("1")

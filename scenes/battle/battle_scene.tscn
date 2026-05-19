@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cwl2q4wwq10yk" path="res://scenes/grid/HexTile3D.tscn" id="1_3hov6"]
 [ext_resource type="Script" uid="uid://cf64jr78ejp6m" path="res://scripts/grid/grid_manager.gd" id="1_grid"]
-[ext_resource type="Resource" path="res://data/grid/default_grid_config.tres" id="1_gridcfg"]
+[ext_resource type="Resource" uid="uid://dkgsw7mfjoqcb" path="res://data/grid/default_grid_config.tres" id="1_gridcfg"]
 [ext_resource type="PackedScene" uid="uid://bxaf8sg4b8btq" path="res://scenes/units/unit_base.tscn" id="2_unit"]
 [ext_resource type="Script" uid="uid://c6tk4442fbsj0" path="res://scripts/battle/battle_flow.gd" id="3_flow"]
 [ext_resource type="Script" uid="uid://70j77mfw2bul" path="res://scripts/battle/selection_state.gd" id="4_sel"]
@@ -19,7 +19,7 @@
 [ext_resource type="Resource" uid="uid://biblg1dbmtgpk" path="res://data/encounters/test_skirmish.tres" id="15_enc"]
 [ext_resource type="Script" uid="uid://cp8hu7o8ylerc" path="res://scripts/battle/enemy_brain.gd" id="16_brain"]
 [ext_resource type="PackedScene" uid="uid://b0hk6xljijuoi" path="res://scenes/ui/turn_announce.tscn" id="17_announce"]
-[ext_resource type="Resource" path="res://data/ai/simple_chase_behavior.tres" id="18_ai"]
+[ext_resource type="Resource" uid="uid://cawuehlu7x2sh" path="res://data/ai/simple_chase_behavior.tres" id="18_ai"]
 [ext_resource type="Script" uid="uid://c5gl1fdcgoctr" path="res://scripts/systems/audio_manager.gd" id="19_audio"]
 [ext_resource type="Script" uid="uid://dm2chm2doul65" path="res://scripts/presentation/grid_path_preview.gd" id="grid_path_preview"]
 
@@ -151,19 +151,19 @@ unique_name_in_owner = true
 script = ExtResource("grid_path_preview")
 
 [node name="CameraRig" type="Node3D" parent="World" unique_id=1541699671]
-transform = Transform3D(0.70710677, 0.49999997, 0.49999997, 0, 0.70710677, -0.70710677, -0.70710677, 0.49999997, 0.49999997, 0, 0, 0)
+unique_name_in_owner = true
+transform = Transform3D(0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
 script = ExtResource("14_cam")
 
 [node name="CameraPitch" type="Node3D" parent="World/CameraRig" unique_id=730673366]
-transform = Transform3D(1, 0, 0, 0, 0.81915206, 0.57357645, 0, -0.57357645, 0.81915206, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="World/CameraRig/CameraPitch" unique_id=502109153]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 0.4226182, 0.9063078, 0, -0.90630776, 0.42261827, 0, 12, 12)
+transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, 0, 0, 0)
 projection = 1
 current = true
 fov = 35.0
-size = 12.0
+size = 14.0
 near = 0.5
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1493645176]

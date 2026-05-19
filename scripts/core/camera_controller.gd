@@ -1,30 +1,38 @@
 extends Node3D
 
-@onready var grid_manager := %GridManager
-
 @export var rotation_speed := 90.0
-@export var move_speed := 12.0
-@export var zoom_speed := 4.0
+@export var move_speed := 14.0
+@export var zoom_speed := 8.0
 
 @export var min_zoom := 8.0
-@export var max_zoom := 40.0
+@export var max_zoom := 30.0
 
+@onready var camera_pivot := $CameraPitch
 @onready var camera: Camera3D = (
 	$CameraPitch/Camera3D
 )
 
+
 func _ready():
 
-	global_position = (
-		grid_manager.global_position
+	camera.projection = (
+		Camera3D.PROJECTION_ORTHOGONAL
+	)
+
+	camera.size = 14.0
+
+	camera_pivot.rotation_degrees.x = -55.0
+
+	camera.position = Vector3(
+		0,
+		0,
+		20
 	)
 
 
 func _process(delta):
-
 	_handle_rotation(delta)
 	_handle_movement(delta)
-	_handle_zoom(delta)
 
 
 func _handle_rotation(delta):
@@ -75,10 +83,9 @@ func _handle_movement(delta):
 	)
 
 	move_direction.y = 0
-	move_direction = move_direction.normalized()
 
 	global_position += (
-		move_direction
+		move_direction.normalized()
 		*
 		move_speed
 		*
@@ -86,20 +93,45 @@ func _handle_movement(delta):
 	)
 
 
-func _handle_zoom(delta):
+func _unhandled_input(event):
 
-	if Input.is_action_pressed("zoom_in"):
-		camera.size -= (
-			zoom_speed * delta
-		)
+	if event.is_action_pressed(
+		"zoom_in"
+	):
+		camera.size -= zoom_speed
 
-	if Input.is_action_pressed("zoom_out"):
-		camera.size += (
-			zoom_speed * delta
-		)
+	if event.is_action_pressed(
+		"zoom_out"
+	):
+		camera.size += zoom_speed
 
 	camera.size = clamp(
 		camera.size,
 		min_zoom,
 		max_zoom
+	)
+
+
+func focus_on_unit(unit: UnitBase):
+
+	if not unit:
+		return
+
+	var target_position := (
+		unit.global_position
+	)
+
+	target_position.y = global_position.y
+
+	var tween := create_tween()
+
+	tween.tween_property(
+		self,
+		"global_position",
+		target_position,
+		0.4
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
 	)
