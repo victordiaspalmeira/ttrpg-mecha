@@ -88,9 +88,10 @@ func play_attack() -> void:
 ## Flash white on damage taken.
 func flash_white(duration := 0.15) -> void:
 	if _material:
+		var original_color := _material.albedo_color
 		_material.albedo_color = Color(1, 1, 1, 1)
 		var tween := create_tween()
-		tween.tween_property(_material, "albedo_color", Color(1, 1, 1, 0), duration)
+		tween.tween_property(_material, "albedo_color", original_color, duration)
 
 
 ## Shake the unit when taking damage.
