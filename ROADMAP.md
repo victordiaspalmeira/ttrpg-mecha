@@ -15,6 +15,8 @@
 - [x] Enemy AI
 
 ## Milestone 2 - Mech Identity
+- [ ] Attributes and Formulas
+- [ ] Buffs & Debuffs
 - [ ] Abilities
 - [ ] Passives
 - [ ] Equipment

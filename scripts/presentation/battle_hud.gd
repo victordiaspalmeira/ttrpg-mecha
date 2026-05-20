@@ -221,11 +221,11 @@ func _on_hovered_unit_changed(unit: UnitBase) -> void:
 	
 	var weapon := unit.get_active_weapon()
 	if weapon:
-		attack_label.text = "%s  ·  %d DMG  ·  %d AP" % [weapon.weapon_name, unit.attack_damage, unit.get_attack_ap_cost()]
-		range_label.text = "RNG  %d" % unit.attack_range
+		attack_label.text = "%s  ·  %d DMG  ·  %d AP" % [weapon.weapon_name, unit.get_total_attack_power(), unit.get_attack_ap_cost()]
+		range_label.text = "RNG  %d" % unit.get_effective_range()
 	else:
-		attack_label.text = "ATK  %d  ·  %d AP" % [unit.attack_damage, unit.get_attack_ap_cost()]
-		range_label.text = "RNG  %d" % unit.attack_range
+		attack_label.text = "ATK  %d  ·  %d AP" % [unit.get_total_attack_power(), unit.get_attack_ap_cost()]
+		range_label.text = "RNG  %d" % unit.get_effective_range()
 
 
 func create_turn_order() -> void:
@@ -341,7 +341,7 @@ func _add_weapon_action_button(weapon: WeaponData, slot_name: String, is_active:
 	var btn := Button.new()
 	btn.text = "%s  ·  %s\nDMG %d  RNG %d  %d AP" % [
 		slot_name, weapon.weapon_name,
-		weapon.weapon_damage, weapon.weapon_range, weapon.attack_ap_cost
+		weapon.weapon_power, weapon.weapon_range, weapon.attack_ap_cost
 	]
 	btn.custom_minimum_size = Vector2(0, 56)
 	

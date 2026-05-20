@@ -13,7 +13,7 @@ func is_unit_in_attack_range(attacker: UnitBase, target: UnitBase) -> bool:
 		attacker.current_tile,
 		target.current_tile
 	)
-	return distance <= attacker.attack_range
+	return distance <= attacker.get_effective_range()
 
 
 func can_attack(attacker: UnitBase, target: UnitBase) -> bool:
@@ -35,9 +35,11 @@ func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 	if not attacker.spend_ap(ap_cost):
 		return false
 
-	target.take_damage(attacker.attack_damage)
+	# Damage formula: (attack_power + weapon_power) - target.defense
+	var total_damage: int = attacker.get_total_attack_power()
+	target.take_damage(total_damage)
 
 	attack_executed.emit(attacker, target)
-	target_hit.emit(target, attacker.attack_damage)
+	target_hit.emit(target, total_damage)
 
 	return true

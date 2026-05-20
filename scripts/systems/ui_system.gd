@@ -149,7 +149,7 @@ func _on_hovered_unit_changed(unit):
 
 	attack_label.text = (
 		"ATK: "
-		+ str(unit.attack_damage)
+		+ str(unit.get_total_attack_power())
 	)
 
 	range_label.text = (
