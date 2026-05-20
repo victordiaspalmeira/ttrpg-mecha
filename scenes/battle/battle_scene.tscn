@@ -22,6 +22,9 @@
 [ext_resource type="Resource" uid="uid://cawuehlu7x2sh" path="res://data/ai/simple_chase_behavior.tres" id="18_ai"]
 [ext_resource type="Script" uid="uid://c5gl1fdcgoctr" path="res://scripts/systems/audio_manager.gd" id="19_audio"]
 [ext_resource type="Script" uid="uid://dm2chm2doul65" path="res://scripts/presentation/grid_path_preview.gd" id="grid_path_preview"]
+[ext_resource type="AudioStreamWAV" id="audio_hover" path="res://assets/audio/UI_Menu/001_Hover_01.wav"]
+[ext_resource type="AudioStreamWAV" id="audio_click" path="res://assets/audio/UI_Menu/013_Confirm_03.wav"]
+[ext_resource type="AudioStreamWAV" id="audio_turn_start" path="res://assets/audio/UI_Menu/070_Equip_10.wav"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action"]
 content_margin_left = 12.0
@@ -117,23 +120,38 @@ script = ExtResource("19_audio")
 
 [node name="AudioAttack" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=915229391]
 unique_name_in_owner = true
-volume_db = -5.0
+volume_db = -10.0
 
 [node name="AudioMove" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1796737355]
 unique_name_in_owner = true
-volume_db = -5.0
+volume_db = -10.0
 
 [node name="AudioHit" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=804121127]
 unique_name_in_owner = true
-volume_db = -5.0
+volume_db = -10.0
 
 [node name="AudioDeath" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=928144066]
 unique_name_in_owner = true
-volume_db = -5.0
+volume_db = -10.0
 
 [node name="AudioEndTurn" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=448018891]
 unique_name_in_owner = true
+volume_db = -10.0
+
+[node name="AudioUIHover" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id="uid://c1audiohover"]
+unique_name_in_owner = true
+volume_db = -30.0
+stream = ExtResource("audio_hover")
+
+[node name="AudioUIClick" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id="uid://c1audioclick"]
+unique_name_in_owner = true
+volume_db = -15.0
+stream = ExtResource("audio_click")
+
+[node name="AudioTurnStart" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id="uid://c1audioturnstart"]
+unique_name_in_owner = true
 volume_db = -5.0
+stream = ExtResource("audio_turn_start")
 
 [node name="World" type="Node3D" parent="." unique_id=893958307]
 unique_name_in_owner = true
@@ -234,15 +252,34 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Move"
 
-[node name="AttackButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=1846742205]
+[node name="ActionButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Attack"
+text = "Action"
 
 [node name="EndTurnButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=884703244]
 unique_name_in_owner = true
 layout_mode = 2
 text = "End Turn"
+
+[node name="ActionSubmenu" type="PanelContainer" parent="UI/CanvasLayer"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(180, 0)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 190.0
+offset_top = -210.0
+offset_right = 370.0
+offset_bottom = -12.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_action")
+
+[node name="ActionSubmenuContainer" type="VBoxContainer" parent="UI/CanvasLayer/ActionSubmenu"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
 
 [node name="HoverInfoPanel" type="PanelContainer" parent="UI/CanvasLayer" unique_id=137944931]
 unique_name_in_owner = true

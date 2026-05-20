@@ -9,17 +9,46 @@ extends Node
 func spawn_unit(
 	class_data: ClassData,
 	tile: HexTile,
-	team: String
+	team_id: String,
+	primary_weapon: WeaponData = null,
+	secondary_weapon: WeaponData = null,
+	portrait: Texture2D = null,
+	team_data: TeamData = null
 ) -> UnitBase:
 	var unit: UnitBase = mech_unit_scene.instantiate() as UnitBase
 
+	# Set properties BEFORE adding to tree so _ready() gets correct values
+	unit.class_data = class_data
+	unit.team_id = team_id
+
+	if primary_weapon:
+		unit.primary_weapon = primary_weapon
+	if secondary_weapon:
+		unit.secondary_weapon = secondary_weapon
+	if portrait:
+		unit.portrait = portrait
+
+	# Add to tree — this triggers _ready() which calls apply_team_data
 	units_container.add_child(unit)
 
-	unit.class_data = class_data
-	unit.team = team
+	# Apply team data (colors, etc.) after _ready()
+	if team_data:
+		unit.apply_team_data(team_data)
 
 	unit.apply_class_data()
 
 	unit.move_to_tile(tile)
 
 	return unit
+
+
+func spawn_from_template(template: UnitTemplate, tile: HexTile, team_data: TeamData = null) -> UnitBase:
+	return spawn_unit(
+		template.class_data,
+		tile,
+		template.team_id,
+		template.primary_weapon,
+		template.secondary_weapon,
+		template.portrait,
+		team_data
+	)

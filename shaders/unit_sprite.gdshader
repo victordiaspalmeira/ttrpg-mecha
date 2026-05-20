@@ -1,45 +1,37 @@
 shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_disabled, unshaded;
+render_mode blend_mix, unshaded, cull_disabled, depth_draw_opaque;
 
-uniform sampler2D albedo_texture : filter_nearest, repeat_disable;
-uniform vec4 modulate : source_color = vec4(1.0);
 uniform vec4 outline_color : source_color = vec4(0.35, 0.65, 1.0, 1.0);
-uniform float outline_width = 2.5;
+uniform float outline_width : hint_range(0.0, 8.0) = 2.5;
 
 void fragment() {
-	vec2 tex_size = vec2(textureSize(albedo_texture, 0));
-	vec2 px = vec2(1.0) / tex_size;
-	vec4 tex = texture(albedo_texture, UV);
+	// TEXTURE is the built-in uniform that Sprite3D populates from its texture property.
+	// NO custom sampler2D uniform needed — Sprite3D handles the binding automatically.
+	vec4 tex = texture(TEXTURE, UV);
 
-	if (tex.a > 0.45) {
-		ALBEDO = tex.rgb * modulate.rgb;
-		ALPHA = tex.a * modulate.a;
+	if (tex.a > 0.1) {
+		ALBEDO = tex.rgb;
+		ALPHA = tex.a;
 		return;
 	}
 
-	float edge = 0.0;
-	int radius = int(ceil(outline_width));
+	vec2 px = TEXTURE_PIXEL_SIZE * outline_width;
 
-	for (int x = -4; x <= 4; x++) {
-		if (abs(x) > radius) {
-			continue;
-		}
-		for (int y = -4; y <= 4; y++) {
-			if (abs(y) > radius) {
-				continue;
-			}
-			if (x == 0 && y == 0) {
-				continue;
-			}
-			vec2 offset = vec2(float(x), float(y)) * px * outline_width;
-			edge = max(edge, texture(albedo_texture, UV + offset).a);
-		}
-	}
+	float e = 0.0;
+	e = max(e, texture(TEXTURE, UV + vec2( px.x,  0.0)).a);
+	e = max(e, texture(TEXTURE, UV + vec2(-px.x,  0.0)).a);
+	e = max(e, texture(TEXTURE, UV + vec2( 0.0,   px.y)).a);
+	e = max(e, texture(TEXTURE, UV + vec2( 0.0,  -px.y)).a);
+	e = max(e, texture(TEXTURE, UV + vec2( px.x,  px.y)).a);
+	e = max(e, texture(TEXTURE, UV + vec2(-px.x,  px.y)).a);
+	e = max(e, texture(TEXTURE, UV + vec2( px.x, -px.y)).a);
+	e = max(e, texture(TEXTURE, UV + vec2(-px.x, -px.y)).a);
 
-	if (edge > 0.45) {
+	if (e > 0.1 && outline_color.a > 0.0) {
 		ALBEDO = outline_color.rgb;
 		ALPHA = outline_color.a;
 	} else {
 		ALPHA = 0.0;
+		discard;
 	}
 }

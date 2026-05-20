@@ -33,7 +33,7 @@ func play_for_unit(unit: UnitBase) -> void:
 	visible = true
 	_dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
 
-	var is_player := unit.team == "player"
+	var is_player := unit.is_player_team()
 
 	if is_player:
 		_title.text = "YOUR TURN"
@@ -119,7 +119,7 @@ func _get_unit_display_name(unit: UnitBase) -> String:
 	if unit.unit_name:
 		return unit.unit_name
 
-	return unit.team.capitalize()
+	return unit.team_id.capitalize()
 
 
 func _apply_border(color: Color) -> void:
