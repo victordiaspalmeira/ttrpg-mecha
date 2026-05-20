@@ -22,10 +22,10 @@ Read this before adding features. It defines folder layout, wiring, and patterns
 - `scripts/battle/ai/` — modular enemy AI (`EnemyBehavior`, intents, decision tree stubs)
 
 ### Unit visuals (2.5D)
-- Units use `Sprite3D` with `BILLBOARD_FIXED_Y` and manual frame animation (see `scenes/units/unit_base.tscn` + `UnitSpriteVisual`). Outline shader enabled by default (`use_outline_shader`).
+- Units use `MeshInstance3D` + `QuadMesh` with `StandardMaterial3D` and `BILLBOARD_FIXED_Y` (see `scenes/units/unit_base.tscn` + `UnitSpriteVisual`). No shader — `StandardMaterial3D.albedo_texture` receives each animation frame directly.
 - `UnitBase.configure_from_grid(GridConfig)` syncs foot height to hex surface. `play_attack_visual()` plays one-shot `transform` then returns to `idle`.
 - Placeholder sheets: `assets/sprites/units/placeholder/Gr1_*.png` (80×80 frames). Built at runtime via `Gr1PlaceholderFrames` (`idle`, `idle_powered`, `transform`, `revert`, `full`).
-- Team outline colors live in `UnitSpriteVisual.TEAM_OUTLINE_COLORS` (`player` = blue, `enemy` = red). Add new teams there.
+- Team outline removed temporarily (caused gray-square regression). Outline shader (`shaders/unit_sprite.gdshader`) and `use_outline_shader` export variable still exist for future re-enable when the Sprite3D→ShaderMaterial texture binding is resolved.
 - Per-class sprites later: assign a `SpriteFrames` on `UnitVisual` from `ClassData`, or call `UnitSpriteVisual.play("animation_name")`.
 
 ### Grid (hex)
