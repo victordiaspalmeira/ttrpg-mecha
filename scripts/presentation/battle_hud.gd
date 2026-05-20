@@ -16,7 +16,6 @@ extends Node
 )
 
 @onready var action_panel: PanelContainer = %ActionPanel
-@onready var action_label: Label = %ActionLabel
 @onready var hint_label: Label = %HintLabel
 @onready var movement_label: Label = %MovementLabel
 @onready var ap_label: Label = %APLabel
@@ -34,6 +33,7 @@ extends Node
 @onready var ap_hover_label: Label = %APHoverLabel
 @onready var attack_label: Label = %AttackLabel
 @onready var range_label: Label = %RangeLabel
+@onready var effects_container: HFlowContainer = %EffectsContainer
 @onready var turn_order_container: HBoxContainer = %HBoxContainer
 @onready var damage_popup_container: Control = %DamagePopupContainer
 @onready var camera_controller = (
@@ -51,13 +51,13 @@ var _display_unit: UnitBase = null
 var _battle_finished := false
 var _default_hint := "Move, use actions, then end turn."
 var _feedback_restore_timer: SceneTreeTimer = null
+var _pending_skill: SkillData = null
 
 
 func _ready() -> void:
 	selection_state.action_mode_changed.connect(_on_action_mode_changed)
 	selection_state.hovered_unit_changed.connect(_on_hovered_unit_changed)
 
-	update_action_label(selection_state.current_action_mode)
 	_style_action_buttons(selection_state.current_action_mode)
 	hint_label.add_theme_color_override("font_color", COLOR_HINT_NORMAL)
 
@@ -131,21 +131,10 @@ func present_turn_start(unit: UnitBase) -> void:
 
 
 func _on_action_mode_changed(mode: SelectionState.ActionMode) -> void:
-	update_action_label(mode)
 	_style_action_buttons(mode)
 	_close_submenu()
-
-
-func update_action_label(mode: SelectionState.ActionMode) -> void:
-	var mode_text := "Idle"
-
-	if mode == SelectionState.ActionMode.MOVE:
-		mode_text = "Moving"
-	elif mode == SelectionState.ActionMode.ATTACK:
-		mode_text = "Attacking"
-
-	action_label.text = "Mode · " + mode_text
-
+	if mode != SelectionState.ActionMode.SKILL:
+		_pending_skill = null
 
 func show_battle_result(message: String) -> void:
 	_battle_finished = true
@@ -227,6 +216,66 @@ func _on_hovered_unit_changed(unit: UnitBase) -> void:
 		attack_label.text = "ATK  %d  ·  %d AP" % [unit.get_total_attack_power(), unit.get_attack_ap_cost()]
 		range_label.text = "RNG  %d" % unit.get_effective_range()
 
+	# Display buff/debuff icons
+	_refresh_effect_icons(unit)
+
+
+func _refresh_effect_icons(unit: UnitBase) -> void:
+	# Clear old icons
+	for child in effects_container.get_children():
+		child.queue_free()
+	if unit.active_effects.is_empty():
+		return
+	# Separate buffs and debuffs
+	var buffs: Array[ActiveStatusEffect] = []
+	var debuffs: Array[ActiveStatusEffect] = []
+	for e: ActiveStatusEffect in unit.active_effects:
+		var is_buff := true
+		for stat: String in e.effect.modifiers:
+			if e.effect.modifiers[stat] < 0:
+				is_buff = false
+				break
+		if is_buff:
+			buffs.append(e)
+		else:
+			debuffs.append(e)
+	# Show buffs first, then debuffs
+	for e: ActiveStatusEffect in buffs:
+		_add_effect_icon(e)
+	for e: ActiveStatusEffect in debuffs:
+		_add_effect_icon(e)
+
+
+func _add_effect_icon(e: ActiveStatusEffect) -> void:
+	# Container for icon + duration label
+	var container := VBoxContainer.new()
+	container.alignment = BoxContainer.ALIGNMENT_CENTER
+	container.add_theme_constant_override("separation", 2)
+	
+	# Icon — larger and sharp (no filter)
+	var tex_rect := TextureRect.new()
+	tex_rect.texture = e.effect.get_icon()
+	tex_rect.custom_minimum_size = Vector2(32, 32)
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tex_rect.tooltip_text = "%s\n%s" % [e.effect.display_name, e.effect.description]
+	# Disable texture filtering for crisp pixel art
+	tex_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	container.add_child(tex_rect)
+	
+	# Duration label (bottom-left of icon)
+	var dur_label := Label.new()
+	dur_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	dur_label.add_theme_font_size_override("font_size", 10)
+	dur_label.add_theme_color_override("font_color", Color(1, 0.85, 0.4, 1))
+	if e.effect.duration == -1:
+		dur_label.text = "∞"
+	else:
+		dur_label.text = str(e.turns_remaining)
+	container.add_child(dur_label)
+	
+	effects_container.add_child(container)
+
 
 func create_turn_order() -> void:
 	for unit in units_container.get_children():
@@ -296,8 +345,9 @@ func _on_action_button_pressed() -> void:
 		_close_submenu()
 		return
 	
-	# Build weapon action list for the current unit
+	# Build weapon + skill action list for the current unit
 	_populate_weapon_actions()
+	_populate_skill_actions()
 	action_submenu.visible = true
 
 
@@ -384,6 +434,70 @@ func _add_weapon_action_button(weapon: WeaponData, slot_name: String, is_active:
 	
 	action_submenu_container.add_child(btn)
 	action_submenu_container.move_child(btn, 0)
+
+
+func _populate_skill_actions() -> void:
+	if not _display_unit or not _display_unit.class_data:
+		return
+	for skill: SkillData in _display_unit.class_data.skills:
+		if skill.ap_cost > _display_unit.current_ap:
+			continue
+		_add_skill_action_button(skill)
+
+
+func _add_skill_action_button(skill: SkillData) -> void:
+	var btn := Button.new()
+	btn.text = "%s\n%s  ·  %d AP  ·  RNG %d" % [
+		skill.skill_name, skill.description, skill.ap_cost, skill.skill_range
+	]
+	btn.custom_minimum_size = Vector2(0, 56)
+	
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.12, 0.16, 0.94)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.75, 0.55, 1.0, 1.0)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	style.corner_radius_bottom_left = 8
+	btn.add_theme_stylebox_override("normal", style)
+	
+	var hover_style := style.duplicate()
+	hover_style.border_color = Color(0.85, 0.65, 1.0, 1.0)
+	hover_style.bg_color = Color(0.12, 0.15, 0.2, 0.94)
+	btn.add_theme_stylebox_override("hover", hover_style)
+	
+	btn.add_theme_color_override("font_color", Color(0.85, 0.9, 0.95, 1))
+	btn.add_theme_font_size_override("font_size", 12)
+	
+	btn.pressed.connect(func():
+		_enter_skill_mode(skill)
+		_close_submenu()
+	)
+	
+	action_submenu_container.add_child(btn)
+
+
+## Enters skill targeting mode — the next click on a valid target will execute the skill.
+func _enter_skill_mode(skill: SkillData) -> void:
+	_pending_skill = skill
+	selection_state.set_action_mode(SelectionState.ActionMode.SKILL)
+
+
+## Executes the pending skill on the given target.
+func _execute_skill_on_target(target_unit: UnitBase, target_tile: HexTile = null) -> void:
+	if not _pending_skill:
+		return
+	var scene_root: Node = _display_unit.get_tree().current_scene
+	var executor: SkillExecutor = scene_root.get_node("BattleSession/SkillExecutor")
+	var ctx := SkillContext.new(_display_unit, _pending_skill, target_unit, target_tile)
+	if executor.execute(ctx):
+		_display_unit.spend_ap(_pending_skill.ap_cost)
+		update_resource_display(_display_unit)
+	_pending_skill = null
 
 
 func _close_submenu() -> void:

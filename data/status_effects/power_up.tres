@@ -1,14 +1,15 @@
 [gd_resource type="Resource" script_class="StatusEffect" format=3]
 
-[ext_resource type="Script" uid="uid://status_effect" path="res://scripts/data/status_effect.gd" id="1_s"]
+[ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+[ext_resource type="Texture2D" path="res://assets/icons/buffs/attack_boost.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_s")
 effect_id = "power_up"
 display_name = "Power Up"
-icon = preload("res://assets/icons/buffs/attack_boost.png")
-description = "Increases attack power by 2."
-duration = 1
+description = "Increases attack power by 5."
+duration = 3
+icon = ExtResource("2_icon")
 modifiers = {
-"attack_power": 2
+"attack_power": 5
 }

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/armor_piercer_damage.tres" id="2_dmg"]
+[ext_resource type="Resource" path="res://data/skills/effects/armor_piercer_shatter.tres" id="3_shat"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "armor_piercer"
+skill_name = "Armor Piercer"
+description = "High damage shot that reduces target defense."
+ap_cost = 3
+range = 5
+target_mode = 1
+team_filter = 1
+effects = [ExtResource("2_dmg"), ExtResource("3_shat")]

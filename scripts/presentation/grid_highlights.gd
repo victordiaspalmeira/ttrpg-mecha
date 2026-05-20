@@ -39,6 +39,8 @@ func refresh_highlights() -> void:
 			show_move_tiles(selection_state.selected_unit)
 		SelectionState.ActionMode.ATTACK:
 			show_attack_tiles(selection_state.selected_unit)
+		SelectionState.ActionMode.SKILL:
+			show_skill_tiles(selection_state.selected_unit)
 
 
 func invalidate_cache() -> void:
@@ -97,6 +99,45 @@ func show_attack_tiles(unit: UnitBase) -> void:
 			continue
 
 		tile.show_attack_range()
+
+
+func show_skill_tiles(unit: UnitBase) -> void:
+	if not unit or not unit.current_tile:
+		return
+
+	# Get the pending skill from BattleHud
+	var battle_hud: BattleHud = get_tree().current_scene.get_node_or_null("BattleSession/BattleHud")
+	if not battle_hud or not battle_hud._pending_skill:
+		return
+
+	var skill: SkillData = battle_hud._pending_skill
+	var center_tile: HexTile = unit.current_tile
+
+	# For AOE skills, show all tiles in range
+	if skill.target_mode == SkillData.TargetMode.AOE_CIRCLE:
+		var skill_range: int = skill.aoe_radius
+		if skill.skill_range > 0:
+			skill_range = skill.skill_range
+		var tiles_in_range: Array[HexTile] = grid_manager.get_tiles_in_range(center_tile, skill_range)
+		for tile in tiles_in_range:
+			if tile == center_tile:
+				continue
+			tile.show_attack_reach()
+		# Highlight enemy units in range
+		for tile in tiles_in_range:
+			if tile.occupying_unit and not unit.is_same_team(tile.occupying_unit):
+				tile.show_attack_range()
+	# For single unit skills, show tiles in range
+	elif skill.target_mode == SkillData.TargetMode.SINGLE_UNIT:
+		var tiles_in_range: Array[HexTile] = grid_manager.get_tiles_in_range(center_tile, skill.skill_range)
+		for tile in tiles_in_range:
+			if tile == center_tile:
+				continue
+			tile.show_attack_reach()
+		for tile in tiles_in_range:
+			if tile.occupying_unit and not unit.is_same_team(tile.occupying_unit):
+				tile.show_attack_range()
+	# For SELF skills, no highlighting needed
 
 
 func _build_cache_key() -> String:

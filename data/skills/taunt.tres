@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/taunt_weaken.tres" id="2_weak"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "taunt"
+skill_name = "Taunt"
+description = "Weaken all enemies in range."
+ap_cost = 3
+range = 0
+target_mode = 3
+team_filter = 1
+aoe_radius = 3
+effects = [ExtResource("2_weak")]

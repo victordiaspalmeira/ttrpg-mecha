@@ -355,7 +355,7 @@ func _bootstrap() -> void:
 	var session: Node = get_parent()
 
 	# Usa o encontro selecionado do GameManager, se disponível
-	if GameManager.selected_encounter:
+	if GameManager and GameManager.selected_encounter:
 		encounter = GameManager.selected_encounter
 
 	setup(

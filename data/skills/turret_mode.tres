@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/overwatch_turret.tres" id="2_turr"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "turret_mode"
+skill_name = "Turret Mode"
+description = "Toggle turret mode. Movement = 0, Range +3."
+ap_cost = 2
+skill_range = 0
+target_mode = 0
+team_filter = 3
+effects = [ExtResource("2_turr")]

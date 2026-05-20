@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://bxaf8sg4b8btq"]
+[gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://b7xy67jmttvfa" path="res://scripts/units/unit_base.gd" id="1_unit"]
-[ext_resource type="Script" uid="uid://cxu3s4u1nn7e2" path="res://scripts/units/unit_sprite_visual.gd" id="2_visual"]
+[ext_resource type="Script" path="res://scripts/units/unit_base.gd" id="1_unit"]
+[ext_resource type="Script" path="res://scripts/units/unit_sprite_visual.gd" id="2_visual"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_sprite"]
 size = Vector2(1, 1)
@@ -18,10 +18,8 @@ script = ExtResource("1_unit")
 script = ExtResource("2_visual")
 default_animation = "idle"
 pixel_size = 0.022
-outline_width = 2.5
 y_offset = 0.0
 use_placeholder_sheets = true
-use_outline_shader = true
 
 [node name="SpriteAnchor" type="Node3D" parent="UnitVisual"]
 

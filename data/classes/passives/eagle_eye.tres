@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="PassiveEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/passive_effect.gd" id="1_p"]
+
+[resource]
+script = ExtResource("1_p")
+passive_type = 0
+display_name = "Eagle Eye"
+description = "+1 weapon range"
+stat_name = "attack_range"
+stat_value = 1
+condition = "ranged_only"

@@ -116,8 +116,32 @@ func _handle_click() -> bool:
 		SelectionState.ActionMode.ATTACK:
 			var target: UnitBase = _resolve_attack_target(pick, current_unit)
 			if target == null:
+				print("ATTACK: no target found, pick=%s" % str(pick))
 				return false
+			print("ATTACK: targeting %s" % target.unit_name)
 			return battle_flow.try_attack_unit(target)
+
+		SelectionState.ActionMode.SKILL:
+			# Get the pending skill from BattleHud to check targeting mode
+			var battle_hud: BattleHud = current_unit.get_tree().current_scene.get_node_or_null("BattleSession/BattleHud")
+			if not battle_hud or not battle_hud._pending_skill:
+				return false
+			var skill: SkillData = battle_hud._pending_skill
+			var target_unit: UnitBase = _resolve_attack_target(pick, current_unit)
+			var target_tile: HexTile = selection_state.hovered_tile
+			# For AOE skills centered on caster, use caster's tile
+			if skill.target_mode == SkillData.TargetMode.AOE_CIRCLE and skill.skill_range <= 0:
+				target_tile = current_unit.current_tile
+			# For SELF skills, no target needed
+			elif skill.target_mode == SkillData.TargetMode.SELF:
+				pass
+			elif not target_unit and not target_tile:
+				print("SKILL: no target found, pick=%s" % str(pick))
+				return false
+			print("SKILL: targeting unit=%s tile=%s mode=%d" % [target_unit, target_tile, skill.target_mode])
+			battle_hud._execute_skill_on_target(target_unit, target_tile)
+			selection_state.set_action_mode(SelectionState.ActionMode.NONE)
+			return true
 
 	return false
 
