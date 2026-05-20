@@ -9,8 +9,8 @@ extends Node
 @onready var world = %World
 
 @onready var selection_manager := (
-	systems.get_node("SelectionManager")
-	as SelectionManager
+	systems.get_node("SelectionState")
+	as SelectionState
 )
 
 @onready var units_container = (

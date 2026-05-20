@@ -1,14 +1,15 @@
 [gd_resource type="Resource" script_class="StatusEffect" format=3]
 
 [ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+[ext_resource type="Texture2D" path="res://assets/icons/debuffs/slowed.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_s")
 effect_id = "slow"
 display_name = "Slow"
-icon = preload("res://assets/icons/debuffs/slowed.png")
 description = "Reduces movement by 2."
 duration = 1
+icon = ExtResource("2_icon")
 modifiers = {
 "movement": -2
 }

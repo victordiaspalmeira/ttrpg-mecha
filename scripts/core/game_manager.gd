@@ -9,7 +9,6 @@ func _ready() -> void:
 
 
 func _load_encounters() -> void:
-	# Busca todos os arquivos .tres na pasta de encontros
 	var dir := DirAccess.open("res://data/encounters/")
 	if not dir:
 		push_error("GameManager: Could not open encounters directory.")
@@ -21,11 +20,17 @@ func _load_encounters() -> void:
 		if file_name.ends_with(".tres") or file_name.ends_with(".remap"):
 			var clean_name := file_name.trim_suffix(".remap")
 			var path := "res://data/encounters/" + clean_name
-			var encounter := load(path) as Resource
-			if encounter and encounter.get("display_name") != null:
-				encounters.append(encounter)
+			print("GameManager: Loading encounter: ", path)
+			var encounter = load(path) as Resource
+			if encounter == null:
+				push_error("GameManager: FAILED to load encounter: " + path)
+			else:
+				print("GameManager: Successfully loaded: ", path)
+				if encounter.get("display_name") != null:
+					encounters.append(encounter)
 		file_name = dir.get_next()
 	dir.list_dir_end()
+	print("GameManager: Total encounters loaded: ", encounters.size())
 
 
 func start_encounter(encounter: Resource) -> void:

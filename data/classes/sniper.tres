@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/class_data.gd" id="1_c"]
+[ext_resource type="Resource" path="res://data/weapons/starter_rifle.tres" id="2_pri"]
+[ext_resource type="Resource" path="res://data/weapons/shotgun.tres" id="3_sec"]
+[ext_resource type="Resource" path="res://data/skills/precision_shot.tres" id="4_s1"]
+[ext_resource type="Resource" path="res://data/skills/turret_mode.tres" id="5_s2"]
+[ext_resource type="Resource" path="res://data/skills/armor_piercer.tres" id="6_s3"]
+[ext_resource type="Resource" path="res://data/classes/passives/eagle_eye.tres" id="7_passive"]
+
+[resource]
+script = ExtResource("1_c")
+class_id = "sniper"
+display_name = "Sniper"
+max_hp = 6
+movement = 5
+max_ap = 3
+defense = 0
+base_attack = 3
+primary_weapon = ExtResource("2_pri")
+secondary_weapon = ExtResource("3_sec")
+skills = [ExtResource("4_s1"), ExtResource("5_s2"), ExtResource("6_s3")]
+passives = [ExtResource("7_passive")]

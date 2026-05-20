@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/class_data.gd" id="1_c"]
+[ext_resource type="Resource" path="res://data/weapons/starter_rifle.tres" id="2_pri"]
+[ext_resource type="Resource" path="res://data/weapons/shotgun.tres" id="3_sec"]
+[ext_resource type="Resource" path="res://data/skills/suppression.tres" id="4_s1"]
+[ext_resource type="Resource" path="res://data/skills/adrenaline_rush.tres" id="5_s2"]
+[ext_resource type="Resource" path="res://data/skills/grenade.tres" id="6_s3"]
+[ext_resource type="Resource" path="res://data/classes/passives/close_quarters.tres" id="7_passive"]
+
+[resource]
+script = ExtResource("1_c")
+class_id = "assault"
+display_name = "Assault"
+max_hp = 8
+movement = 4
+max_ap = 4
+defense = 1
+base_attack = 2
+primary_weapon = ExtResource("2_pri")
+secondary_weapon = ExtResource("3_sec")
+skills = [ExtResource("4_s1"), ExtResource("5_s2"), ExtResource("6_s3")]
+passives = [ExtResource("7_passive")]

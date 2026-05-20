@@ -9,6 +9,7 @@ enum ActionMode {
 	NONE,
 	MOVE,
 	ATTACK,
+	SKILL,
 }
 
 var hovered_tile: HexTile = null

@@ -16,7 +16,7 @@
 [ext_resource type="Script" uid="uid://bq7yuyvgyaywf" path="res://scripts/systems/unit_spawner.gd" id="12_spawn"]
 [ext_resource type="Script" uid="uid://b6mhb1ova5orl" path="res://scripts/battle/battle_input.gd" id="13_input"]
 [ext_resource type="Script" uid="uid://ci3hqhwh1fa21" path="res://scripts/core/camera_controller.gd" id="14_cam"]
-[ext_resource type="Resource" uid="uid://biblg1dbmtgpk" path="res://data/encounters/test_skirmish.tres" id="15_enc"]
+[ext_resource type="Resource" path="res://data/encounters/test_skirmish.tres" id="15_enc"]
 [ext_resource type="Script" uid="uid://cp8hu7o8ylerc" path="res://scripts/battle/enemy_brain.gd" id="16_brain"]
 [ext_resource type="PackedScene" uid="uid://b0hk6xljijuoi" path="res://scenes/ui/turn_announce.tscn" id="17_announce"]
 [ext_resource type="Resource" uid="uid://cawuehlu7x2sh" path="res://data/ai/simple_chase_behavior.tres" id="18_ai"]
@@ -25,6 +25,7 @@
 [ext_resource type="AudioStream" uid="uid://duw0psg2kxosb" path="res://assets/audio/UI_Menu/001_Hover_01.wav" id="audio_hover"]
 [ext_resource type="AudioStream" uid="uid://b5rqp4mufwlf7" path="res://assets/audio/UI_Menu/070_Equip_10.wav" id="audio_turn_start"]
 [ext_resource type="Script" uid="uid://dm2chm2doul65" path="res://scripts/presentation/grid_path_preview.gd" id="grid_path_preview"]
+[ext_resource type="Script" uid="uid://skill_executor" path="res://scripts/skills/skill_executor.gd" id="skill_exec"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action"]
 content_margin_left = 12.0
@@ -113,6 +114,10 @@ default_behavior = ExtResource("18_ai")
 unique_name_in_owner = true
 script = ExtResource("3_flow")
 encounter = ExtResource("15_enc")
+
+[node name="SkillExecutor" type="Node" parent="BattleSession" unique_id=990000001]
+unique_name_in_owner = true
+script = ExtResource("skill_exec")
 
 [node name="AudioManager" type="Node" parent="BattleSession" unique_id=1325734932]
 unique_name_in_owner = true
@@ -328,6 +333,11 @@ layout_mode = 2
 [node name="RangeLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1580520776]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="EffectsContainer" type="HFlowContainer" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1580520777]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="TurnOrderBar" type="PanelContainer" parent="UI/CanvasLayer" unique_id=1412219759]
 unique_name_in_owner = true

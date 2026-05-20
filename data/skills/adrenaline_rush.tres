@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/adrenaline_haste.tres" id="2_haste"]
+[ext_resource type="Resource" path="res://data/skills/effects/adrenaline_powerup.tres" id="3_pwup"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "adrenaline_rush"
+skill_name = "Adrenaline Rush"
+description = "Gain Haste and Power Up."
+ap_cost = 2
+range = 0
+target_mode = 0
+team_filter = 3
+effects = [ExtResource("2_haste"), ExtResource("3_pwup")]

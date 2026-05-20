@@ -14,6 +14,13 @@ extends Resource
 @export var base_attack := 2
 
 @export var primary_weapon: WeaponData
+@export var secondary_weapon: WeaponData
+
+## Skills this class can use.
+@export var skills: Array[SkillData] = []
+
+## Passive effects always active for this class.
+@export var passives: Array[PassiveEffect] = []
 
 ## Optional per-class AI. Falls back to EnemyBrain.default_behavior.
 @export var enemy_behavior: EnemyBehavior

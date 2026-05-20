@@ -1,16 +1,15 @@
 [gd_resource type="Resource" script_class="StatusEffect" format=3]
 
 [ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+[ext_resource type="Texture2D" path="res://assets/icons/spells/summoning_spell.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_s")
 effect_id = "turret"
 display_name = "Turret Mode"
-icon = preload("res://assets/icons/buffs/knockback_resistance.png")
-description = "Range +3, Movement = 0. Only for rifle/missile weapons."
-duration = 1
+description = "Unit is in turret mode. Movement locked."
+duration = -1
+icon = ExtResource("2_icon")
 modifiers = {
-"range": 3,
-"movement": -999,
-"allowed_tags": ["rifle", "missile"]
+"movement": -999
 }

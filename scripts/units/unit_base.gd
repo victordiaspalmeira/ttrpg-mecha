@@ -31,12 +31,14 @@ var attack_power := 0
 
 var attack_range := 1
 
+## Passive bonuses from class (applied on _ready).
+var _passive_bonuses: Dictionary = {}
+
 # Grid state
 var current_tile: HexTile = null
 
 # Runtime
 var active_effects: Array[ActiveStatusEffect] = []
-var _effects_ticked_this_turn := false
 var skill_cooldowns := {}
 
 # Equipment
@@ -62,17 +64,27 @@ func refresh_turn() -> void:
 
 
 ## Applies a StatusEffect to this unit. Returns the ActiveStatusEffect instance.
+## If the effect already exists, refreshes its duration (for buffs/debuffs).
 func add_effect(effect_data: StatusEffect, source: String = "") -> ActiveStatusEffect:
-	if has_effect(effect_data.effect_id):
-		return null
+	# Check if effect already exists — if so, refresh duration
+	for e in active_effects:
+		if e.effect.effect_id == effect_data.effect_id:
+			e.turns_remaining = effect_data.duration
+			return e
 	var active := ActiveStatusEffect.new(effect_data, source)
 	active_effects.append(active)
+	# Immediately apply movement lock if effect has movement modifier <= -999
+	if effect_data.modifiers.has("movement") and effect_data.modifiers["movement"] <= -999:
+		current_movement = 0
 	return active
 
 
 ## Removes all active instances of a given effect_id.
 func remove_effect(effect_id: String) -> void:
 	active_effects = active_effects.filter(func(e: ActiveStatusEffect): return e.effect.effect_id != effect_id)
+	# Restore movement if turret mode was removed
+	if effect_id == "turret":
+		current_movement = get_effective_movement()
 
 
 ## Returns true if this unit currently has at least one instance of effect_id.
@@ -285,7 +297,54 @@ func apply_class_data() -> void:
 		primary_weapon = class_data.primary_weapon
 
 	_apply_combat_stats()
+	_apply_passives()
 	_apply_team_visual()
+
+
+func _apply_passives() -> void:
+	if not class_data:
+		return
+	_passive_bonuses.clear()
+	for passive: PassiveEffect in class_data.passives:
+		match passive.passive_type:
+			PassiveEffect.PassiveType.FLAT_STAT_BONUS:
+				_passive_bonuses[passive.stat_name] = passive.stat_value
+				if passive.stat_name == "defense":
+					defense += passive.stat_value
+				elif passive.stat_name == "attack_range":
+					# Only apply range bonus if condition allows current weapon
+					if passive.condition == "ranged_only":
+						var weapon := get_active_weapon()
+						if weapon and _is_ranged_weapon(weapon):
+							attack_range += passive.stat_value
+					else:
+						attack_range += passive.stat_value
+			PassiveEffect.PassiveType.CONDITIONAL_BONUS:
+				_passive_bonuses[passive.stat_name] = passive.stat_value
+				_passive_bonuses["condition_%s" % passive.stat_name] = passive.condition
+
+
+## Returns true if the weapon is ranged (has tag "ranged").
+func _is_ranged_weapon(weapon: WeaponData) -> bool:
+	return weapon.tags.has("ranged")
+
+
+## Safely retrieves the hovered unit from SelectionState.
+func _get_hovered_unit() -> UnitBase:
+	var tree := get_tree()
+	if not tree:
+		return null
+	var current_scene := tree.current_scene
+	if not current_scene:
+		return null
+	# SelectionState is at BattleSession/SelectionState under the root scene
+	var selection_state := current_scene.get_node_or_null("BattleSession/SelectionState")
+	if not selection_state:
+		# Fallback: try the root directly
+		selection_state = current_scene.get_node_or_null("SelectionState")
+	if not selection_state:
+		return null
+	return selection_state.get("hovered_unit") as UnitBase
 
 
 func _apply_combat_stats() -> void:
@@ -297,12 +356,29 @@ func _apply_combat_stats() -> void:
 		attack_range = weapon.weapon_range
 
 
-## Returns total attack power: base attack of the unit + active weapon power.
+## Returns total attack power: base attack + weapon power + effects + passives.
 func get_total_attack_power() -> int:
 	var weapon := get_active_weapon()
 	var wp := weapon.weapon_power if weapon else 1
 	var mod := get_effect_modifier("attack_power")
-	return maxi(1, attack_power + wp + mod)
+	var total := attack_power + wp + mod
+	
+	# Apply conditional passives (e.g. Close Quarters: +1 at range <= 2)
+	if _passive_bonuses.has("attack_power"):
+		var condition: String = _passive_bonuses.get("condition_attack_power", "")
+		if condition == "range_le_2":
+			var target_unit: UnitBase = _get_hovered_unit()
+			if target_unit and current_tile and target_unit.current_tile:
+				var dist: int = HexMath.axial_distance_tiles(current_tile, target_unit.current_tile)
+				if dist <= 2:
+					total += _passive_bonuses["attack_power"]
+	
+	return maxi(1, total)
+
+
+## Returns passive bonus value for a stat (0 if none).
+func get_passive_bonus(stat: String) -> int:
+	return _passive_bonuses.get(stat, 0)
 
 
 func _apply_team_visual() -> void:
