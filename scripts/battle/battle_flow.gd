@@ -249,7 +249,12 @@ func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 
 	attacker.play_attack_visual()
 	_show_attack_line(attacker, target)
-	battle_hud.show_action_name_popup("Attack")
+	
+	# Show weapon name in popup
+	var weapon := attacker.get_active_weapon()
+	var action_name := weapon.weapon_name if weapon else "Attack"
+	battle_hud.show_action_name_popup(action_name)
+	
 	battle_hud.show_damage_popup(target, damage)
 	battle_hud.update_resource_display(attacker)
 	return true
