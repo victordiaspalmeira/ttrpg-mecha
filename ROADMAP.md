@@ -1,30 +1,31 @@
 # Roadmap
 
-## Milestone 1 - Tactical Foundation
-- Hex grid
-- Selection
-- Movement
-- AP system
+## Foundation — Core Systems
+- [x] Hex grid
+- [x] Selection
+- [x] Movement
+- [x] AP system
+- [x] **2.5D sprite rendering pipeline** (MeshInstance3D + StandardMaterial3D, placeholder sheets)
 
-## Milestone 2 - Combat Core
-- Attacks
-- Damage
-- HP
-- Turn system
-- Enemy AI
+## Milestone 1 - Combat Core
+- [x] Attacks
+- [x] Damage
+- [x] HP
+- [x] Turn system
+- [x] Enemy AI
 
-## Milestone 3 - Mech Identity
-- Abilities
-- Passives
-- Equipment
+## Milestone 2 - Mech Identity
+- [ ] Abilities
+- [ ] Passives
+- [ ] Equipment
 
-## Milestone 4 - Juice
-- VFX
-- Camera polish
-- UI polish
-- Audio
+## Milestone 3 - Juice
+- [ ] VFX (outline shader, particles)
+- [ ] Camera polish
+- [ ] UI polish
+- [ ] Audio
 
-## Milestone 5 - Demo
-- 3 mechs
-- 3 enemies
-- 1 playable map
+## Milestone 4 - Demo
+- [ ] 3 mechs
+- [ ] 3 enemies
+- [ ] 1 playable map
