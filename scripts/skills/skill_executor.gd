@@ -33,6 +33,11 @@ func execute(ctx: SkillContext) -> bool:
 	if audio_manager:
 		audio_manager.play_skill_sfx(ctx.skill.skill_id)
 
+	# Show action name popup
+	var battle_hud := _get_battle_hud(ctx.caster)
+	if battle_hud:
+		battle_hud.show_action_name_popup(ctx.skill.skill_name)
+
 	return true
 
 
@@ -160,3 +165,8 @@ func _apply_stat_modifier(effect: SkillEffect, target: UnitBase) -> void:
 func _get_audio_manager(unit: UnitBase) -> AudioManager:
 	var scene_root: Node = unit.get_tree().current_scene
 	return scene_root.get_node_or_null("BattleSession/AudioManager") as AudioManager
+
+
+func _get_battle_hud(unit: UnitBase) -> BattleHud:
+	var scene_root: Node = unit.get_tree().current_scene
+	return scene_root.get_node_or_null("BattleSession/BattleHud") as BattleHud

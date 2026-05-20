@@ -86,7 +86,7 @@ func play_attack() -> void:
 
 
 ## Flash white on damage taken.
-func flash_white(duration := 0.15) -> void:
+func flash_white(duration := 0.25) -> void:
 	if _material:
 		var original_color := _material.albedo_color
 		_material.albedo_color = Color(1, 1, 1, 1)
@@ -95,7 +95,7 @@ func flash_white(duration := 0.15) -> void:
 
 
 ## Shake the unit when taking damage.
-func shake(intensity := 0.06, duration := 0.25) -> void:
+func shake(intensity := 0.08, duration := 0.4) -> void:
 	var original_pos := _sprite_anchor.position
 	var tween := create_tween()
 	var elapsed := 0.0

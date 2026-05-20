@@ -177,6 +177,7 @@ func try_move_to_hovered_tile() -> bool:
 
 	var moved: bool = execute_move(unit, target_tile)
 	if moved:
+		battle_hud.show_action_name_popup("Move")
 		selection_state.set_action_mode(SelectionState.ActionMode.NONE)
 		_clear_path_preview()
 
@@ -248,6 +249,7 @@ func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 
 	attacker.play_attack_visual()
 	_show_attack_line(attacker, target)
+	battle_hud.show_action_name_popup("Attack")
 	battle_hud.show_damage_popup(target, damage)
 	battle_hud.update_resource_display(attacker)
 	return true

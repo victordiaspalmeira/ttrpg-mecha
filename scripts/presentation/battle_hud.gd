@@ -52,6 +52,7 @@ var _battle_finished := false
 var _default_hint := "Move, use actions, then end turn."
 var _feedback_restore_timer: SceneTreeTimer = null
 var _pending_skill: SkillData = null
+var _action_name_popup: PanelContainer = null
 
 
 func _ready() -> void:
@@ -516,6 +517,64 @@ func _on_submenu_visibility_changed() -> void:
 		# Clear children when hidden to keep it fresh
 		for child in action_submenu_container.get_children():
 			child.queue_free()
+
+
+## Shows a centered action name banner at the top of the screen.
+func show_action_name_popup(action_name: String, duration := 1.2) -> void:
+	# Remove existing popup if any
+	if _action_name_popup and is_instance_valid(_action_name_popup):
+		_action_name_popup.queue_free()
+		_action_name_popup = null
+	
+	# Create panel
+	var panel := PanelContainer.new()
+	_action_name_popup = panel
+	
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.06, 0.1, 0.85)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.55, 0.75, 1.0, 0.9)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	style.corner_radius_bottom_left = 8
+	style.content_margin_left = 24
+	style.content_margin_right = 24
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	panel.add_theme_stylebox_override("panel", style)
+	
+	var label := Label.new()
+	label.text = action_name
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", Color(0.85, 0.92, 1.0, 1.0))
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	panel.add_child(label)
+	
+	# Add to tree, position at top center
+	var canvas_layer := CanvasLayer.new()
+	canvas_layer.layer = 10
+	add_child(canvas_layer)
+	canvas_layer.add_child(panel)
+	
+	# Position at top center of screen
+	var screen_size := get_viewport().get_visible_rect().size
+	panel.position = Vector2(screen_size.x / 2 - panel.size.x / 2, 40)
+	
+	# Animate: fade in, hold, fade out
+	panel.modulate.a = 0.0
+	var tween := create_tween()
+	tween.tween_property(panel, "modulate:a", 1.0, 0.15)
+	tween.tween_interval(duration - 0.3)
+	tween.tween_property(panel, "modulate:a", 0.0, 0.15)
+	tween.tween_callback(func():
+		if is_instance_valid(panel):
+			panel.queue_free()
+		_action_name_popup = null
+	)
 
 
 ## Shows a floating damage/heal/buff popup above a unit.
