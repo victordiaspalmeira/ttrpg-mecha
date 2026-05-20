@@ -10,4 +10,5 @@ display_name = "Ember"
 max_hp = 8
 movement = 3
 max_ap = 3
+base_attack = 2
 primary_weapon = ExtResource("2_weapon")

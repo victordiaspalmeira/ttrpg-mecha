@@ -9,6 +9,10 @@ extends Resource
 @export var q := 0
 @export var r := 0
 
+## Direct weapon assignments (used when no template is set).
+@export var primary_weapon: WeaponData
+@export var secondary_weapon: WeaponData
+
 
 func get_class_data() -> ClassData:
 	if template and template.class_data:
@@ -25,10 +29,10 @@ func get_team_id() -> String:
 func get_primary_weapon() -> WeaponData:
 	if template and template.primary_weapon:
 		return template.primary_weapon
-	return null
+	return primary_weapon
 
 
 func get_secondary_weapon() -> WeaponData:
 	if template and template.secondary_weapon:
 		return template.secondary_weapon
-	return null
+	return secondary_weapon

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StatusEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+
+[resource]
+script = ExtResource("1_s")
+effect_id = "energize"
+display_name = "Energize"
+icon = preload("res://assets/icons/buffs/magic_amplification.png")
+description = "Increases max AP by 1."
+duration = 1
+modifiers = {
+"max_ap": 1
+}

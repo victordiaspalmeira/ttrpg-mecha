@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatusEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+
+[resource]
+script = ExtResource("1_s")
+effect_id = "turret"
+display_name = "Turret Mode"
+icon = preload("res://assets/icons/buffs/knockback_resistance.png")
+description = "Range +3, Movement = 0. Only for rifle/missile weapons."
+duration = 1
+modifiers = {
+"range": 3,
+"movement": -999,
+"allowed_tags": ["rifle", "missile"]
+}

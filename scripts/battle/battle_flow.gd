@@ -239,7 +239,7 @@ func try_attack_unit(target_unit: UnitBase) -> bool:
 
 
 func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
-	var damage: int = attacker.attack_damage
+	var damage: int = attacker.get_total_attack_power()
 
 	if not combat_resolver.execute_attack(attacker, target):
 		return false

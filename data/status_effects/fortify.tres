@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StatusEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+
+[resource]
+script = ExtResource("1_s")
+effect_id = "fortify"
+display_name = "Fortify"
+icon = preload("res://assets/icons/buffs/defense_boost.png")
+description = "Increases defense by 2."
+duration = 1
+modifiers = {
+"defense": 2
+}

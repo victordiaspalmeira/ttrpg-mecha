@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StatusEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+
+[resource]
+script = ExtResource("1_s")
+effect_id = "weaken"
+display_name = "Weaken"
+icon = preload("res://assets/icons/debuffs/attack_down.png")
+description = "Reduces attack power by 2."
+duration = 1
+modifiers = {
+"attack_power": -2
+}

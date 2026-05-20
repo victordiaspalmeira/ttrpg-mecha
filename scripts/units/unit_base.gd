@@ -25,14 +25,18 @@ var current_movement := 0
 var max_ap := 0
 var current_ap := 0
 var defense := 0
-var attack_damage := 1
+
+## Base attack power (from class). Added to active weapon power for total damage.
+var attack_power := 0
+
 var attack_range := 1
 
 # Grid state
 var current_tile: HexTile = null
 
 # Runtime
-var status_effects := []
+var active_effects: Array[ActiveStatusEffect] = []
+var _effects_ticked_this_turn := false
 var skill_cooldowns := {}
 
 # Equipment
@@ -51,9 +55,95 @@ func _ready() -> void:
 
 
 func refresh_turn() -> void:
-	current_movement = max_movement
-	current_ap = max_ap
+	_tick_effects()
+	current_movement = get_effective_movement()
+	current_ap = get_effective_max_ap()
 	reduce_cooldowns()
+
+
+## Applies a StatusEffect to this unit. Returns the ActiveStatusEffect instance.
+func add_effect(effect_data: StatusEffect, source: String = "") -> ActiveStatusEffect:
+	if has_effect(effect_data.effect_id):
+		return null
+	var active := ActiveStatusEffect.new(effect_data, source)
+	active_effects.append(active)
+	return active
+
+
+## Removes all active instances of a given effect_id.
+func remove_effect(effect_id: String) -> void:
+	active_effects = active_effects.filter(func(e: ActiveStatusEffect): return e.effect.effect_id != effect_id)
+
+
+## Returns true if this unit currently has at least one instance of effect_id.
+func has_effect(effect_id: String) -> bool:
+	for e in active_effects:
+		if e.effect.effect_id == effect_id:
+			return true
+	return false
+
+
+func _tick_effects() -> void:
+	var expired: Array[ActiveStatusEffect] = []
+	for e in active_effects:
+		if e.tick():
+			expired.append(e)
+	for e in expired:
+		active_effects.erase(e)
+
+
+## Returns total modifier for a stat from all active effects.
+func get_effect_modifier(stat: String) -> int:
+	var total := 0
+	for e in active_effects:
+		total += e.get_modifier(stat)
+	return total
+
+
+## Movement accounting for status effect modifiers.
+## Special sentinel -999 forces movement to 0 (used by Turret Mode).
+func get_effective_movement() -> int:
+	var mod := get_effect_modifier("movement")
+	if mod <= -999:
+		return 0
+	return maxi(1, max_movement + mod)
+
+
+## Max AP accounting for status effect modifiers.
+func get_effective_max_ap() -> int:
+	return maxi(1, max_ap + get_effect_modifier("max_ap"))
+
+
+## Range accounting for status effect modifiers.
+## Only applies range bonuses if the active weapon has a matching tag
+## from the effect's "allowed_tags" modifier list.
+func get_effective_range() -> int:
+	var range_mod := get_effect_modifier("range")
+	
+	# Check tag restrictions
+	if range_mod > 0:
+		var weapon := get_active_weapon()
+		if weapon and not weapon.tags.is_empty():
+			var allowed = _get_allowed_tags_for_stat("range")
+			if not allowed.is_empty():
+				var has_tag := false
+				for t in weapon.tags:
+					if t in allowed:
+						has_tag = true
+						break
+				if not has_tag:
+					range_mod = 0  # weapon doesn't qualify
+	
+	return maxi(1, attack_range + range_mod)
+
+
+## Returns list of allowed weapon tags for effects that modify a given stat.
+func _get_allowed_tags_for_stat(stat: String) -> Array:
+	for e in active_effects:
+		var tag_list = e.effect.modifiers.get("allowed_tags", [])
+		if not tag_list.is_empty() and e.effect.modifiers.has(stat):
+			return tag_list
+	return []
 
 
 func get_active_weapon() -> WeaponData:
@@ -92,12 +182,10 @@ func spend_movement(amount: int) -> bool:
 
 
 func can_spend_ap(amount: int) -> bool:
-
 	return amount > 0 and current_ap >= amount
 
 
 func spend_ap(amount: int) -> bool:
-
 	if not can_spend_ap(amount):
 		return false
 
@@ -112,7 +200,11 @@ func reduce_cooldowns() -> void:
 
 
 func take_damage(amount: int) -> void:
-	var final_damage = maxi(1, amount - defense)
+	var effective_defense := maxi(
+		1,
+		defense + get_effect_modifier("defense")
+	)
+	var final_damage = maxi(1, amount - effective_defense)
 	current_hp -= final_damage
 
 	if current_hp <= 0:
@@ -197,13 +289,20 @@ func apply_class_data() -> void:
 
 
 func _apply_combat_stats() -> void:
-	attack_damage = 1
+	attack_power = class_data.base_attack if class_data else 0
 	attack_range = 1
 
 	var weapon := get_active_weapon()
 	if weapon:
-		attack_damage = weapon.weapon_damage
 		attack_range = weapon.weapon_range
+
+
+## Returns total attack power: base attack of the unit + active weapon power.
+func get_total_attack_power() -> int:
+	var weapon := get_active_weapon()
+	var wp := weapon.weapon_power if weapon else 1
+	var mod := get_effect_modifier("attack_power")
+	return maxi(1, attack_power + wp + mod)
 
 
 func _apply_team_visual() -> void:
