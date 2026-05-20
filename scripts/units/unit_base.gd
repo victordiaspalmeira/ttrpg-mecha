@@ -6,10 +6,13 @@ signal died
 # Identity
 @export var unit_name := ""
 @export var class_id := ""
-@export var team := "player"
+@export var team_id := "player"
 
 @export var portrait: Texture2D
 @export var class_data: ClassData
+
+## Team data with colors and properties
+var team_data: TeamData = null
 
 # Movement animation
 @export var movement_tween_duration := 0.3
@@ -34,9 +37,10 @@ var skill_cooldowns := {}
 
 # Equipment
 @export var primary_weapon: WeaponData
-@export var primary_weapon_id := ""
-@export var secondary_weapon_id := ""
-@export var melee_weapon_id := ""
+@export var secondary_weapon: WeaponData
+
+## Which weapon is currently active: "primary" or "secondary"
+var active_weapon_slot := "primary"
 
 @onready var _unit_visual: UnitSpriteVisual = $UnitVisual
 
@@ -52,11 +56,24 @@ func refresh_turn() -> void:
 	reduce_cooldowns()
 
 
+func get_active_weapon() -> WeaponData:
+	if active_weapon_slot == "primary" and primary_weapon:
+		return primary_weapon
+	if active_weapon_slot == "secondary" and secondary_weapon:
+		return secondary_weapon
+	return primary_weapon
+
+
+func switch_weapon() -> void:
+	if secondary_weapon:
+		active_weapon_slot = "secondary" if active_weapon_slot == "primary" else "primary"
+		_apply_combat_stats()
+
+
 func get_attack_ap_cost() -> int:
-
-	if primary_weapon:
-		return maxi(1, primary_weapon.attack_ap_cost)
-
+	var weapon := get_active_weapon()
+	if weapon:
+		return maxi(1, weapon.attack_ap_cost)
 	return 1
 
 
@@ -130,9 +147,31 @@ func move_to_tile(tile: HexTile) -> void:
 
 
 func get_portrait() -> Texture2D:
+	if portrait:
+		return portrait
 	if class_data and class_data.portrait:
 		return class_data.portrait
-	return portrait
+	# Fallback: use the first frame of the idle animation from the overworld sprite
+	if _unit_visual and _unit_visual.sprite_frames:
+		var frames := _unit_visual.sprite_frames
+		if frames.has_animation("idle") and frames.get_frame_count("idle") > 0:
+			return frames.get_frame_texture("idle", 0)
+	return null
+
+
+func apply_team_data(p_team_data: TeamData) -> void:
+	team_data = p_team_data
+	_apply_team_visual()
+
+
+func is_player_team() -> bool:
+	if team_data:
+		return team_data.is_player
+	return team_id == "player"
+
+
+func is_same_team(other: UnitBase) -> bool:
+	return team_id == other.team_id
 
 
 func apply_class_data() -> void:
@@ -149,7 +188,8 @@ func apply_class_data() -> void:
 	current_movement = max_movement
 	current_ap = max_ap
 
-	if class_data.primary_weapon:
+	# Load class default weapon only if no primary is set
+	if not primary_weapon and class_data.primary_weapon:
 		primary_weapon = class_data.primary_weapon
 
 	_apply_combat_stats()
@@ -160,14 +200,15 @@ func _apply_combat_stats() -> void:
 	attack_damage = 1
 	attack_range = 1
 
-	if primary_weapon:
-		attack_damage = primary_weapon.weapon_damage
-		attack_range = primary_weapon.weapon_range
+	var weapon := get_active_weapon()
+	if weapon:
+		attack_damage = weapon.weapon_damage
+		attack_range = weapon.weapon_range
 
 
 func _apply_team_visual() -> void:
 	if _unit_visual:
-		_unit_visual.apply_team(team)
+		_unit_visual.apply_team_data(team_data, team_id)
 
 
 func get_visual_top_y() -> float:

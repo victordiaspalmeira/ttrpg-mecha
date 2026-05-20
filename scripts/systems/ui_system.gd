@@ -138,7 +138,7 @@ func _on_hovered_unit_changed(unit):
 	portrait_rect.texture = unit.portrait
 
 	hover_info_panel.visible = true
-	name_label.text = unit.team.to_upper()
+	name_label.text = unit.team_id.to_upper()
 
 	hp_label.text = (
 		"HP: "
@@ -169,7 +169,7 @@ func create_turn_order():
 
 		var label = item.get_node("Label")
 
-		if unit.team == "player":
+		if unit.team_id == "player":
 			label.text = "P"
 		else:
 			label.text = "E"

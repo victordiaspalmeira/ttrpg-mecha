@@ -41,7 +41,8 @@ static func _add_horizontal_strip(
 
 	var frame_w := FRAME_SIZE.x
 	var frame_h := FRAME_SIZE.y
-	var frame_count: int = sheet.get_width() / frame_w
+	# Use float division to avoid INTEGER_DIVISION warning, then cast to int
+	var frame_count: int = int(float(sheet.get_width()) / float(frame_w))
 	if frame_count < 1:
 		push_error(
 			"Gr1PlaceholderFrames: no frames in '%s' (%dx%d)"

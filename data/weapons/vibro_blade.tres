@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://c1vibro"]
+
+[ext_resource type="Script" uid="uid://p3qe5vg4cf35" path="res://scripts/data/weapon_data.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+weapon_id = "vibro_blade"
+weapon_name = "Vibro Blade"
+weapon_description = "Devastating melee attacks."
+weapon_damage = 6
+weapon_range = 1
+attack_ap_cost = 1
+weapon_type = "melee"

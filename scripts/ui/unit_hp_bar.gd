@@ -1,8 +1,8 @@
 extends Sprite3D
 
-@export var max_segments := 8
+@export var max_segments := 6
 
-@export var segment_width := 6
+@export var segment_width := 5
 @export var segment_height := 2
 
 @export var segment_spacing := 1
@@ -21,8 +21,8 @@ extends Sprite3D
 	0.85
 )
 
-var current_hp := 8
-var max_hp := 8
+var current_hp := 6
+var max_hp := 6
 
 
 func _ready() -> void:
@@ -30,6 +30,12 @@ func _ready() -> void:
 	billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 
+	update_texture()
+
+
+func set_colors(p_full_color: Color, p_empty_color: Color) -> void:
+	full_color = p_full_color
+	empty_color = p_empty_color
 	update_texture()
 
 

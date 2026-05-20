@@ -57,10 +57,10 @@ func _handle_movement(delta):
 	var input_vector := Vector3.ZERO
 
 	if Input.is_action_pressed("move_up"):
-		input_vector.z -= 1
+		input_vector.z += 1
 
 	if Input.is_action_pressed("move_down"):
-		input_vector.z += 1
+		input_vector.z -= 1
 
 	if Input.is_action_pressed("move_left"):
 		input_vector.x -= 1

@@ -15,16 +15,16 @@ func setup(unit: UnitBase) -> void:
 
 	_cache_styles()
 
-	_team = unit.team
+	_team = unit.team_id
 
 	if unit.class_data and unit.class_data.display_name:
 		_label.text = unit.class_data.display_name.substr(0, 1).to_upper()
-	elif unit.team == "player":
+	elif unit.team_id == "player":
 		_label.text = "P"
 	else:
 		_label.text = "E"
 
-	if unit.team == "enemy":
+	if unit.team_id == "enemy":
 		_style_idle.border_color = Color(0.55, 0.32, 0.28, 1.0)
 		_style_active.bg_color = Color(0.42, 0.18, 0.16, 1.0)
 		_style_active.border_color = Color(1.0, 0.5, 0.35, 1.0)

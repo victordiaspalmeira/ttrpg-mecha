@@ -51,7 +51,7 @@ func setup(
 	turn_controller.current_unit_changed.connect(_on_current_unit_changed)
 	selection_state.action_mode_changed.connect(func(_mode: SelectionState.ActionMode) -> void: update_path_preview())
 
-	battle_input.setup(self, selection_state, grid_manager, turn_controller)
+	battle_input.setup(self, selection_state, grid_manager, turn_controller, audio_manager)
 	enemy_brain.setup(self, grid_manager, combat_resolver, turn_controller)
 
 	if audio_manager:
@@ -79,7 +79,7 @@ func _spawn_encounter() -> void:
 		return
 
 	for spawn in encounter.spawns:
-		if not spawn or not spawn.class_data:
+		if not spawn or not spawn.get_class_data():
 			continue
 
 		var tile: HexTile = grid_manager.get_tile(spawn.q, spawn.r)
@@ -88,7 +88,22 @@ func _spawn_encounter() -> void:
 			push_warning("BattleFlow: no tile at (%d, %d)." % [spawn.q, spawn.r])
 			continue
 
-		var unit: UnitBase = unit_spawner.spawn_unit(spawn.class_data, tile, spawn.team)
+		# Try template-first spawning
+		var team_data: TeamData = encounter.get_team_data(spawn.get_team_id())
+		var unit: UnitBase
+		if spawn.template:
+			unit = unit_spawner.spawn_from_template(spawn.template, tile, team_data)
+		else:
+			unit = unit_spawner.spawn_unit(
+				spawn.get_class_data(),
+				tile,
+				spawn.get_team_id(),
+				spawn.get_primary_weapon(),
+				spawn.get_secondary_weapon(),
+				null,
+				team_data
+			)
+
 		unit.configure_from_grid(grid_manager.config)
 
 		if audio_manager:
@@ -127,7 +142,7 @@ func try_select_current_unit(unit: UnitBase) -> void:
 	if unit != turn_controller.current_unit:
 		return
 
-	if unit.team != "player":
+	if not unit.is_player_team():
 		return
 
 	if selection_state.selected_tile:
@@ -203,7 +218,7 @@ func try_attack_unit(target_unit: UnitBase) -> bool:
 		battle_hud.show_action_feedback("No valid target.")
 		return false
 
-	if target_unit.team == attacker.team:
+	if target_unit.is_same_team(attacker):
 		battle_hud.show_action_feedback("Cannot attack allies.")
 		return false
 
@@ -277,30 +292,44 @@ func _check_battle_end() -> void:
 	if _battle_over:
 		return
 
-	if not _has_team_alive("player"):
-		_finish_battle("enemy")
-	elif not _has_team_alive("enemy"):
-		_finish_battle("player")
-
-
-func _has_team_alive(team: String) -> bool:
+	var player_team_alive := false
+	var enemy_teams_alive: Array[String] = []
 	for child in _units_container.get_children():
 		var unit := child as UnitBase
-		if unit and is_instance_valid(unit) and unit.team == team:
+		if unit and is_instance_valid(unit) and unit.current_hp > 0:
+			if unit.is_player_team():
+				player_team_alive = true
+			else:
+				if not enemy_teams_alive.has(unit.team_id):
+					enemy_teams_alive.append(unit.team_id)
+
+	if not player_team_alive:
+		_finish_battle("enemy")
+	elif enemy_teams_alive.is_empty():
+		var player_team := encounter.get_player_team()
+		_finish_battle(player_team.team_id if player_team else "player")
+
+
+func _has_team_alive(team_id: String) -> bool:
+	for child in _units_container.get_children():
+		var unit := child as UnitBase
+		if unit and is_instance_valid(unit) and unit.team_id == team_id and unit.current_hp > 0:
 			return true
 
 	return false
 
 
-func _finish_battle(winner_team: String) -> void:
+func _finish_battle(winner_team_id: String) -> void:
 	_battle_over = true
-	_winner_team = winner_team
+	_winner_team = winner_team_id
 
 	grid_highlights.clear_all_tiles()
 	_clear_path_preview()
 	selection_state.set_action_mode(SelectionState.ActionMode.NONE)
 
-	var message: String = "VICTORY" if winner_team == "player" else "DEFEAT"
+	var winner_team := encounter.get_team_data(winner_team_id)
+	var is_player_win := winner_team.is_player if winner_team else (winner_team_id == "player")
+	var message: String = "VICTORY" if is_player_win else "DEFEAT"
 	call_deferred("_show_result_banner", message)
 
 
@@ -324,6 +353,10 @@ func _ready() -> void:
 
 func _bootstrap() -> void:
 	var session: Node = get_parent()
+
+	# Usa o encontro selecionado do GameManager, se disponível
+	if GameManager.selected_encounter:
+		encounter = GameManager.selected_encounter
 
 	setup(
 		_world.get_node("GridManager") as GridManager,
