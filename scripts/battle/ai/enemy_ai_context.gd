@@ -28,7 +28,7 @@ func get_opponents() -> Array[UnitBase]:
 		if not is_instance_valid(other):
 			continue
 
-		if other == unit or other.team == unit.team:
+		if other == unit or other.team_id == unit.team_id:
 			continue
 
 		opponents.append(other)

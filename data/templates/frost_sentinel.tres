@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UnitTemplate" format=3 uid="uid://c1frostsentinel"]
+
+[ext_resource type="Script" uid="uid://c1template" path="res://scripts/data/unit_template.gd" id="1_tpl"]
+[ext_resource type="Resource" uid="uid://b52ehkibvbjjc" path="res://data/classes/frost_class.tres" id="2_class"]
+[ext_resource type="Resource" uid="uid://bemmchnwgjpdr" path="res://data/weapons/starter_rifle.tres" id="3_weapon"]
+[ext_resource type="Resource" uid="uid://c1missile" path="res://data/weapons/missile_launcher.tres" id="4_secondary"]
+
+[resource]
+script = ExtResource("1_tpl")
+template_id = "frost_sentinel"
+display_name = "Frost Sentinel"
+class_data = ExtResource("2_class")
+primary_weapon = ExtResource("3_weapon")
+secondary_weapon = ExtResource("4_secondary")
+team_id = "enemy"

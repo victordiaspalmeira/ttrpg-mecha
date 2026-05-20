@@ -9,6 +9,7 @@ extends Node
 @onready var turn_controller: TurnController = %TurnController
 @onready var units_container: Node3D = %Units
 @onready var turn_announce: TurnAnnounce = %TurnAnnounce
+@onready var audio_manager: AudioManager = %AudioManager
 
 @onready var camera: Camera3D = (
 	%World.get_node("CameraRig/CameraPitch/Camera3D")
@@ -20,8 +21,10 @@ extends Node
 @onready var movement_label: Label = %MovementLabel
 @onready var ap_label: Label = %APLabel
 @onready var move_button: Button = %MoveButton
-@onready var attack_button: Button = %AttackButton
+@onready var action_button: Button = %ActionButton
 @onready var end_turn_button: Button = %EndTurnButton
+@onready var action_submenu: PanelContainer = %ActionSubmenu
+@onready var action_submenu_container: VBoxContainer = %ActionSubmenuContainer
 @onready var unit_ui_container: Control = %UnitUIContainer
 @onready var hover_info_panel: PanelContainer = %HoverInfoPanel
 @onready var portrait_rect: TextureRect = %Portrait
@@ -46,7 +49,7 @@ var hp_bars := {}
 var _turn_order_items := {}
 var _display_unit: UnitBase = null
 var _battle_finished := false
-var _default_hint := "Move, attack, then end turn."
+var _default_hint := "Move, use actions, then end turn."
 var _feedback_restore_timer: SceneTreeTimer = null
 
 
@@ -57,6 +60,9 @@ func _ready() -> void:
 	update_action_label(selection_state.current_action_mode)
 	_style_action_buttons(selection_state.current_action_mode)
 	hint_label.add_theme_color_override("font_color", COLOR_HINT_NORMAL)
+
+	action_button.pressed.connect(_on_action_button_pressed)
+	action_submenu.visibility_changed.connect(_on_submenu_visibility_changed)
 
 	await get_tree().process_frame
 	call_deferred("_build_unit_ui")
@@ -88,7 +94,7 @@ func _restore_default_hint() -> void:
 	if _battle_finished:
 		return
 
-	if _display_unit and _display_unit.team == "player":
+	if _display_unit and _display_unit.team_id == "player":
 		hint_label.text = _default_hint
 	elif _display_unit:
 		hint_label.text = "Enemy is acting..."
@@ -118,12 +124,16 @@ func present_turn_start(unit: UnitBase) -> void:
 	_highlight_turn_order(unit)
 	_update_player_controls(unit)
 
+	if audio_manager:
+		audio_manager.play_turn_start()
+
 	await turn_announce.play_for_unit(unit)
 
 
 func _on_action_mode_changed(mode: SelectionState.ActionMode) -> void:
 	update_action_label(mode)
 	_style_action_buttons(mode)
+	_close_submenu()
 
 
 func update_action_label(mode: SelectionState.ActionMode) -> void:
@@ -167,43 +177,28 @@ func update_resource_display(unit: UnitBase) -> void:
 
 
 func create_hp_bars() -> void:
-
 	for unit in units_container.get_children():
-
-		var hp_bar = (
-			unit_hp_bar_scene.instantiate()
-		)
-
-		var visual = (
-			unit.get_node(
-				"UnitVisual"
-			)
-		)
-
+		var hp_bar = unit_hp_bar_scene.instantiate()
+		var visual = unit.get_node("UnitVisual")
 		visual.add_child(hp_bar)
-
-		hp_bar.position = Vector3(
-			0,
-			1.8,
-			0
-		)
-
+		hp_bar.position = Vector3(0, 2.5, 0)
+		
+		# Apply team colors
+		if unit.team_data:
+			hp_bar.set_colors(unit.team_data.hp_bar_full_color, unit.team_data.hp_bar_empty_color)
+		
 		hp_bars[unit] = hp_bar
 
-func update_hp_bars() -> void:
 
+func update_hp_bars() -> void:
 	for unit in hp_bars.keys():
 		if not is_instance_valid(unit):
 			continue
-
 		if unit.max_hp <= 0:
 			continue
-
 		var hp_bar = hp_bars[unit]
-		hp_bar.set_hp(
-			unit.current_hp,
-			unit.max_hp
-		)
+		hp_bar.set_hp(unit.current_hp, unit.max_hp)
+
 
 func _on_hovered_unit_changed(unit: UnitBase) -> void:
 	if not unit:
@@ -217,24 +212,28 @@ func _on_hovered_unit_changed(unit: UnitBase) -> void:
 	if unit.class_data and unit.class_data.display_name:
 		display_name = unit.class_data.display_name
 	else:
-		display_name = unit.team.capitalize()
+		display_name = unit.team_id.capitalize()
 
 	name_label.text = display_name.to_upper()
 	hp_label.text = "HP  %d / %d" % [unit.current_hp, unit.max_hp]
 	movement_hover_label.text = "MOV  %d / %d" % [unit.current_movement, unit.max_movement]
 	ap_hover_label.text = "AP  %d / %d" % [unit.current_ap, unit.max_ap]
-	attack_label.text = "ATK  %d  ·  %d AP" % [unit.attack_damage, unit.get_attack_ap_cost()]
-	range_label.text = "RNG  %d" % unit.attack_range
+	
+	var weapon := unit.get_active_weapon()
+	if weapon:
+		attack_label.text = "%s  ·  %d DMG  ·  %d AP" % [weapon.weapon_name, unit.attack_damage, unit.get_attack_ap_cost()]
+		range_label.text = "RNG  %d" % unit.attack_range
+	else:
+		attack_label.text = "ATK  %d  ·  %d AP" % [unit.attack_damage, unit.get_attack_ap_cost()]
+		range_label.text = "RNG  %d" % unit.attack_range
 
 
 func create_turn_order() -> void:
 	for unit in units_container.get_children():
 		var item = turn_order_item_scene.instantiate()
 		turn_order_container.add_child(item)
-
 		if item.has_method("setup"):
 			item.setup(unit)
-
 		_turn_order_items[unit] = item
 
 
@@ -242,22 +241,19 @@ func _highlight_turn_order(active_unit: UnitBase) -> void:
 	for unit in _turn_order_items.keys():
 		if not is_instance_valid(unit):
 			continue
-
 		var item = _turn_order_items[unit]
-
 		if not is_instance_valid(item):
 			continue
-
 		if item.has_method("set_active"):
 			item.set_active(unit == active_unit)
 
 
 func _update_player_controls(unit: UnitBase) -> void:
-	var is_player := unit.team == "player"
+	var is_player := unit.is_player_team()
 	_set_player_controls_enabled(is_player and not _battle_finished)
 
 	if is_player:
-		_default_hint = "Move, attack, then end turn."
+		_default_hint = "Move, use actions, then end turn."
 		_restore_default_hint()
 	else:
 		hint_label.text = "Enemy is acting..."
@@ -265,22 +261,23 @@ func _update_player_controls(unit: UnitBase) -> void:
 
 func _set_player_controls_enabled(enabled: bool) -> void:
 	move_button.disabled = not enabled
-	attack_button.disabled = not enabled
+	action_button.disabled = not enabled
 	end_turn_button.disabled = not enabled
+	if not enabled:
+		_close_submenu()
 	action_panel.modulate.a = 1.0 if enabled else 0.45
 
 
 func _style_action_buttons(mode: SelectionState.ActionMode) -> void:
-
 	_reset_button_style(move_button)
-	_reset_button_style(attack_button)
+	_reset_button_style(action_button)
 	_reset_button_style(end_turn_button)
 
 	match mode:
 		SelectionState.ActionMode.MOVE:
 			_highlight_button(move_button)
 		SelectionState.ActionMode.ATTACK:
-			_highlight_button(attack_button)
+			_highlight_button(action_button)
 
 
 func _highlight_button(button: Button) -> void:
@@ -289,6 +286,115 @@ func _highlight_button(button: Button) -> void:
 
 func _reset_button_style(button: Button) -> void:
 	button.add_theme_color_override("font_color", COLOR_MODE_OFF)
+
+
+func _on_action_button_pressed() -> void:
+	if not _display_unit:
+		return
+	
+	if action_submenu.visible:
+		_close_submenu()
+		return
+	
+	# Build weapon action list for the current unit
+	_populate_weapon_actions()
+	action_submenu.visible = true
+
+
+func _populate_weapon_actions() -> void:
+	# Clear existing items
+	for child in action_submenu_container.get_children():
+		child.queue_free()
+	
+	if not _display_unit:
+		return
+	
+	var weapons_added := false
+	
+	# Primary weapon action
+	if _display_unit.primary_weapon:
+		weapons_added = true
+		_add_weapon_action_button(
+			_display_unit.primary_weapon,
+			"PRIMARY",
+			_display_unit.active_weapon_slot == "primary"
+		)
+	
+	# Secondary weapon action
+	if _display_unit.secondary_weapon:
+		weapons_added = true
+		_add_weapon_action_button(
+			_display_unit.secondary_weapon,
+			"SEC.",
+			_display_unit.active_weapon_slot == "secondary"
+		)
+	
+	if not weapons_added:
+		var label := Label.new()
+		label.text = "No weapons"
+		label.add_theme_color_override("font_color", Color(0.55, 0.6, 0.68, 1))
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		action_submenu_container.add_child(label)
+
+
+func _add_weapon_action_button(weapon: WeaponData, slot_name: String, is_active: bool) -> void:
+	var btn := Button.new()
+	btn.text = "%s  ·  %s\nDMG %d  RNG %d  %d AP" % [
+		slot_name, weapon.weapon_name,
+		weapon.weapon_damage, weapon.weapon_range, weapon.attack_ap_cost
+	]
+	btn.custom_minimum_size = Vector2(0, 56)
+	
+	# Style
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.12, 0.16, 0.94)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.45, 0.75, 1.0, 1.0) if is_active else Color(0.28, 0.38, 0.52, 1)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	style.corner_radius_bottom_left = 8
+	btn.add_theme_stylebox_override("normal", style)
+	
+	var hover_style := style.duplicate()
+	hover_style.border_color = Color(0.55, 0.85, 1.0, 1.0)
+	hover_style.bg_color = Color(0.12, 0.15, 0.2, 0.94)
+	btn.add_theme_stylebox_override("hover", hover_style)
+	
+	btn.add_theme_color_override("font_color", Color(0.85, 0.9, 0.95, 1))
+	btn.add_theme_font_size_override("font_size", 12)
+	
+	# If it's the active weapon, clicking sets ATTACK mode directly
+	# If it's inactive, clicking switches to that weapon first
+	if is_active:
+		btn.pressed.connect(func():
+			selection_state.set_action_mode(SelectionState.ActionMode.ATTACK)
+			_close_submenu()
+		)
+	else:
+		btn.pressed.connect(func():
+			_display_unit.switch_weapon()
+			update_resource_display(_display_unit)
+			selection_state.set_action_mode(SelectionState.ActionMode.ATTACK)
+			_close_submenu()
+		)
+	
+	action_submenu_container.add_child(btn)
+	action_submenu_container.move_child(btn, 0)
+
+
+func _close_submenu() -> void:
+	action_submenu.visible = false
+
+
+func _on_submenu_visibility_changed() -> void:
+	if not action_submenu.visible:
+		# Clear children when hidden to keep it fresh
+		for child in action_submenu_container.get_children():
+			child.queue_free()
 
 
 func show_damage_popup(unit: UnitBase, amount: int) -> void:

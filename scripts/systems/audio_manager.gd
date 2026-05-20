@@ -1,7 +1,7 @@
 class_name AudioManager
 extends Node
 
-@export var sfx_volume := -5.0
+@export var sfx_volume := -8.0
 
 @onready var sfx_attack: AudioStreamPlayer = %AudioAttack
 @onready var sfx_move: AudioStreamPlayer = %AudioMove
@@ -10,6 +10,7 @@ extends Node
 @onready var sfx_end_turn: AudioStreamPlayer = %AudioEndTurn
 @onready var sfx_ui_hover: AudioStreamPlayer = %AudioUIHover
 @onready var sfx_ui_click: AudioStreamPlayer = %AudioUIClick
+@onready var sfx_turn_start: AudioStreamPlayer = %AudioTurnStart
 
 var _combat_resolver: CombatResolver = null
 var _turn_controller: TurnController = null
@@ -63,14 +64,15 @@ func play_ui_hover() -> void:
 func play_ui_click() -> void:
 	_play(sfx_ui_click)
 
+func play_turn_start() -> void:
+	_play(sfx_turn_start)
+
 func _play(player: AudioStreamPlayer) -> void:
 	if not player:
 		return
 
 	if not player.stream:
 		return
-
-	player.volume_db = sfx_volume
 
 	if player.playing:
 		player.stop()

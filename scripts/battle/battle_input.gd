@@ -6,9 +6,9 @@ var selection_state: SelectionState = null
 var grid_manager: GridManager = null
 var turn_controller: TurnController = null
 var camera: Camera3D = null
+var audio_manager: AudioManager = null
 
 var move_button: Button = null
-var attack_button: Button = null
 var end_turn_button: Button = null
 
 var _last_hovered_tile: HexTile = null
@@ -19,24 +19,40 @@ func setup(
 	p_battle_flow: BattleFlow,
 	p_selection_state: SelectionState,
 	p_grid_manager: GridManager,
-	p_turn_controller: TurnController
+	p_turn_controller: TurnController,
+	p_audio_manager: AudioManager = null
 ) -> void:
 	battle_flow = p_battle_flow
 	selection_state = p_selection_state
 	grid_manager = p_grid_manager
 	turn_controller = p_turn_controller
+	audio_manager = p_audio_manager
 
 	var world: Node3D = %World
 	var camera_rig: Node3D = world.get_node("CameraRig") as Node3D
 	camera = camera_rig.get_node("CameraPitch/Camera3D") as Camera3D
 
 	move_button = %MoveButton
-	attack_button = %AttackButton
 	end_turn_button = %EndTurnButton
 
 	move_button.pressed.connect(_on_move_button_pressed)
-	attack_button.pressed.connect(_on_attack_button_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_button_pressed)
+
+	move_button.mouse_entered.connect(_on_button_hovered)
+	end_turn_button.mouse_entered.connect(_on_button_hovered)
+
+	move_button.pressed.connect(_on_button_clicked)
+	end_turn_button.pressed.connect(_on_button_clicked)
+
+
+func _on_button_hovered() -> void:
+	if audio_manager:
+		audio_manager.play_ui_hover()
+
+
+func _on_button_clicked() -> void:
+	if audio_manager:
+		audio_manager.play_ui_click()
 
 
 func _process(_delta: float) -> void:
@@ -76,7 +92,7 @@ func _is_player_turn() -> bool:
 		return false
 
 	var unit: UnitBase = turn_controller.current_unit
-	return unit != null and unit.team == "player"
+	return unit != null and unit.team_id == "player"
 
 
 func _handle_click() -> bool:
@@ -135,21 +151,11 @@ func _on_move_button_pressed() -> void:
 	battle_flow.update_path_preview()
 
 
-func _on_attack_button_pressed() -> void:
-	if not _can_use_action_mode(SelectionState.ActionMode.ATTACK):
-		var unit: UnitBase = turn_controller.current_unit
-		if unit and not unit.can_spend_ap(unit.get_attack_ap_cost()):
-			battle_flow.battle_hud.show_action_feedback("Not enough AP to attack.")
-		return
-
-	selection_state.set_action_mode(SelectionState.ActionMode.ATTACK)
-	battle_flow.update_path_preview()
-
 
 func _can_use_action_mode(mode: SelectionState.ActionMode) -> bool:
 	var unit: UnitBase = turn_controller.current_unit
 
-	if not unit or unit.team != "player":
+	if not unit or unit.team_id != "player":
 		return false
 
 	if mode == SelectionState.ActionMode.MOVE:

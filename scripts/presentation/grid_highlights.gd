@@ -93,7 +93,7 @@ func show_attack_tiles(unit: UnitBase) -> void:
 			continue
 
 		var target_unit: UnitBase = tile.occupying_unit
-		if target_unit.team == unit.team:
+		if target_unit.team_id == unit.team_id:
 			continue
 
 		tile.show_attack_range()

@@ -31,7 +31,7 @@ func setup(
 
 
 func _on_current_unit_changed(unit: UnitBase) -> void:
-	if not unit or unit.team != "enemy":
+	if not unit or unit.team_id != "enemy":
 		return
 
 	if _running:
