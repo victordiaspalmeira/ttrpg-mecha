@@ -379,6 +379,9 @@ func _finish_battle(winner_team_id: String) -> void:
 
 func _show_result_banner(message: String) -> void:
 	await battle_hud.show_battle_result(message)
+	# Wait for the popup to finish, then quit
+	await get_tree().create_timer(2.0).timeout
+	get_tree().quit()
 
 
 ## Flashes a tile red briefly to indicate invalid action.
