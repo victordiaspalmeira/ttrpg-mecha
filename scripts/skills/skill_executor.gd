@@ -28,6 +28,11 @@ func execute(ctx: SkillContext) -> bool:
 	for status: StatusEffect in ctx.skill.self_effects:
 		ctx.caster.add_effect(status, ctx.caster.unit_name)
 
+	# Play skill SFX
+	var audio_manager := _get_audio_manager(ctx.caster)
+	if audio_manager:
+		audio_manager.play_skill_sfx(ctx.skill.skill_id)
+
 	return true
 
 
@@ -150,3 +155,8 @@ func _apply_stat_modifier(effect: SkillEffect, target: UnitBase) -> void:
 	status.duration = effect.duration
 	status.modifiers[effect.stat_name] = effect.stat_modifier
 	target.add_effect(status, target.unit_name)
+
+
+func _get_audio_manager(unit: UnitBase) -> AudioManager:
+	var scene_root: Node = unit.get_tree().current_scene
+	return scene_root.get_node_or_null("BattleSession/AudioManager") as AudioManager

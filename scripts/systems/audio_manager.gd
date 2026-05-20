@@ -12,6 +12,16 @@ extends Node
 @onready var sfx_ui_click: AudioStreamPlayer = %AudioUIClick
 @onready var sfx_turn_start: AudioStreamPlayer = %AudioTurnStart
 
+# Skill SFX players
+@onready var sfx_skill_buff: AudioStreamPlayer = %AudioSkillBuff
+@onready var sfx_skill_debuff: AudioStreamPlayer = %AudioSkillDebuff
+@onready var sfx_skill_heal: AudioStreamPlayer = %AudioSkillHeal
+@onready var sfx_skill_damage: AudioStreamPlayer = %AudioSkillDamage
+@onready var sfx_skill_turret: AudioStreamPlayer = %AudioSkillTurret
+@onready var sfx_skill_taunt: AudioStreamPlayer = %AudioSkillTaunt
+@onready var sfx_skill_grenade: AudioStreamPlayer = %AudioSkillGrenade
+@onready var sfx_invalid: AudioStreamPlayer = %AudioInvalid
+
 var _combat_resolver: CombatResolver = null
 var _turn_controller: TurnController = null
 var _battle_flow: BattleFlow = null
@@ -58,14 +68,42 @@ func play_death() -> void:
 func play_end_turn() -> void:
 	_play(sfx_end_turn)
 
+
 func play_ui_hover() -> void:
 	_play(sfx_ui_hover)
+
 
 func play_ui_click() -> void:
 	_play(sfx_ui_click)
 
+
 func play_turn_start() -> void:
 	_play(sfx_turn_start)
+
+
+func play_invalid() -> void:
+	_play(sfx_invalid)
+
+
+## Play a skill SFX based on skill_id.
+func play_skill_sfx(skill_id: String) -> void:
+	match skill_id:
+		"fortify", "adrenaline_rush":
+			_play(sfx_skill_buff)
+		"turret_mode":
+			_play(sfx_skill_turret)
+		"taunt":
+			_play(sfx_skill_taunt)
+		"grenade":
+			_play(sfx_skill_grenade)
+		"suppression", "armor_piercer", "precision_shot":
+			_play(sfx_skill_damage)
+		"overwatch":
+			_play(sfx_skill_turret)
+		_:
+			# Default: try to categorize by effect type
+			_play(sfx_skill_buff)
+
 
 func _play(player: AudioStreamPlayer) -> void:
 	if not player:

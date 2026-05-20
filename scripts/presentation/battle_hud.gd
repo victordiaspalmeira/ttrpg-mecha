@@ -274,6 +274,13 @@ func _add_effect_icon(e: ActiveStatusEffect) -> void:
 		dur_label.text = str(e.turns_remaining)
 	container.add_child(dur_label)
 	
+	# Pop animation: scale up then bounce back
+	container.scale = Vector2(0.1, 0.1)
+	var pop_tween := create_tween()
+	pop_tween.set_trans(Tween.TRANS_BACK)
+	pop_tween.set_ease(Tween.EASE_OUT)
+	pop_tween.tween_property(container, "scale", Vector2(1, 1), 0.25)
+	
 	effects_container.add_child(container)
 
 
@@ -511,7 +518,9 @@ func _on_submenu_visibility_changed() -> void:
 			child.queue_free()
 
 
-func show_damage_popup(unit: UnitBase, amount: int) -> void:
+## Shows a floating damage/heal/buff popup above a unit.
+## popup_type: "damage" (red), "heal" (green), "buff" (yellow)
+func show_damage_popup(unit: UnitBase, amount: int, popup_type: String = "damage") -> void:
 	var popup = damage_popup_scene.instantiate()
 	damage_popup_container.add_child(popup)
 
@@ -522,7 +531,21 @@ func show_damage_popup(unit: UnitBase, amount: int) -> void:
 	popup.position = Vector2(screen_position.x - 20, screen_position.y - 40)
 
 	var label: Label = popup.get_node("Label")
-	label.text = "-" + str(amount)
+	
+	# Set text and color based on popup type
+	match popup_type:
+		"heal":
+			label.text = "+" + str(amount)
+			label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
+		"buff":
+			label.text = "+" + str(amount)
+			label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))
+		"debuff":
+			label.text = str(amount)
+			label.add_theme_color_override("font_color", Color(0.8, 0.3, 1.0, 1.0))
+		_:  # damage
+			label.text = "-" + str(amount)
+			label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2, 1.0))
 
 	var tween = create_tween()
 	tween.tween_property(popup, "position", popup.position + Vector2(0, -40), 0.5)

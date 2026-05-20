@@ -171,6 +171,8 @@ func try_move_to_hovered_tile() -> bool:
 		battle_hud.show_action_feedback(
 			MovementRules.get_move_failure_reason(unit, target_tile, grid_manager)
 		)
+		# Flash tile red for invalid move feedback
+		_flash_tile_red(target_tile)
 		return false
 
 	var moved: bool = execute_move(unit, target_tile)
@@ -245,9 +247,44 @@ func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 		return false
 
 	attacker.play_attack_visual()
+	_show_attack_line(attacker, target)
 	battle_hud.show_damage_popup(target, damage)
 	battle_hud.update_resource_display(attacker)
 	return true
+
+
+## Shows a brief attack line between attacker and target.
+func _show_attack_line(attacker: UnitBase, target: UnitBase) -> void:
+	var line := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.radial_segments = 4
+	mesh.top_radius = 0.02
+	mesh.bottom_radius = 0.02
+	mesh.height = 1.0  # will be scaled
+	line.mesh = mesh
+	
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.8, 0.2, 0.8)
+	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	line.material_override = mat
+	
+	_world.add_child(line)
+	
+	var start_pos := attacker.global_position + Vector3.UP * 0.5
+	var end_pos := target.global_position + Vector3.UP * 0.5
+	var mid_point := (start_pos + end_pos) / 2.0
+	var direction := (end_pos - start_pos)
+	var length := direction.length()
+	
+	line.global_position = mid_point
+	line.look_at(end_pos, Vector3.UP)
+	line.scale = Vector3(1, 1, length)
+	
+	# Fade out
+	var tween := create_tween()
+	tween.tween_property(line, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(line.queue_free)
 
 
 func end_turn() -> void:
@@ -335,6 +372,26 @@ func _finish_battle(winner_team_id: String) -> void:
 
 func _show_result_banner(message: String) -> void:
 	await battle_hud.show_battle_result(message)
+
+
+## Flashes a tile red briefly to indicate invalid action.
+func _flash_tile_red(tile: HexTile) -> void:
+	if not tile or not tile.highlight_overlay:
+		return
+	var overlay := tile.highlight_overlay
+	overlay.visible = true
+	# Create a red material for the flash
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.2, 0.2, 0.6)
+	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
+	overlay.material_override = mat
+	# Fade out
+	var tween := create_tween()
+	tween.tween_property(overlay, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(func():
+		overlay.visible = false
+		overlay.modulate.a = 1.0
+	)
 
 
 func _refresh_action_highlights() -> void:

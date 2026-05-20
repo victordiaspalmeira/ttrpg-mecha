@@ -219,6 +219,11 @@ func take_damage(amount: int) -> void:
 	var final_damage = maxi(1, amount - effective_defense)
 	current_hp -= final_damage
 
+	# Visual feedback: flash white + shake
+	if _unit_visual:
+		_unit_visual.flash_white()
+		_unit_visual.shake()
+
 	if current_hp <= 0:
 		die()
 
