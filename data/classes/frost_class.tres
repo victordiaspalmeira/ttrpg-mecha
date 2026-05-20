@@ -10,6 +10,5 @@ display_name = "Frost"
 max_hp = 10
 movement = 2
 defense = 1
-base_attack = 2
 primary_weapon = ExtResource("2_weapon")
 metadata/_custom_type_script = "uid://dwarpi45jyf6e"

@@ -214,13 +214,6 @@ theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
 theme_override_font_sizes/font_size = 11
 text = "ACTIONS"
 
-[node name="ActionLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=223525447]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.93, 0.97, 1)
-theme_override_font_sizes/font_size = 14
-text = "Mode · Idle"
-
 [node name="HintLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=582729473]
 unique_name_in_owner = true
 layout_mode = 2
