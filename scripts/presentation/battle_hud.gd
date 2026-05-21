@@ -602,6 +602,10 @@ func show_damage_popup(unit: UnitBase, amount: int, popup_type: String = "damage
 		"debuff":
 			label.text = str(amount)
 			label.add_theme_color_override("font_color", Color(0.8, 0.3, 1.0, 1.0))
+		"death":
+			label.text = "DEAD"
+			label.add_theme_color_override("font_color", Color(1.0, 0.15, 0.1, 1.0))
+			label.add_theme_font_size_override("font_size", 16)
 		_:  # damage
 			label.text = "-" + str(amount)
 			label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2, 1.0))

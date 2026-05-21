@@ -110,6 +110,20 @@ func shake(intensity := 0.08, duration := 0.4) -> void:
 	tween.tween_property(_sprite_anchor, "position", original_pos, 0.05)
 
 
+## Play death animation: fall over + fade out. Returns the tween so caller can await it.
+func play_death() -> Tween:
+	var tween := create_tween()
+	# Fall over (rotate forward)
+	tween.tween_property(_sprite_anchor, "rotation:x", PI / 2.0, 0.4)
+	# Fade out
+	tween.parallel().tween_property(self, "modulate:a", 0.0, 0.5)
+	# Move down slightly
+	tween.parallel().tween_property(_sprite_anchor, "position:y", _sprite_anchor.position.y - 0.3, 0.4)
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN)
+	return tween
+
+
 func play_one_shot(animation_name: String, return_animation: String) -> void:
 	if sprite_frames == null or not sprite_frames.has_animation(animation_name):
 		play(return_animation)

@@ -234,7 +234,33 @@ func heal(amount: int) -> void:
 
 func die() -> void:
 	died.emit()
+	
+	# Play death animation
+	if _unit_visual:
+		var tween := _unit_visual.play_death()
+		# Play death SFX
+		var audio_manager := _get_audio_manager()
+		if audio_manager:
+			audio_manager.play_death()
+		# Show "DEAD" popup
+		var battle_hud := _get_battle_hud()
+		if battle_hud:
+			battle_hud.show_damage_popup(self, 0, "death")
+		# Wait for animation to finish before freeing
+		if tween:
+			await tween.finished
+	
 	queue_free()
+
+
+func _get_audio_manager() -> AudioManager:
+	var scene_root: Node = get_tree().current_scene
+	return scene_root.get_node_or_null("BattleSession/AudioManager") as AudioManager
+
+
+func _get_battle_hud() -> BattleHud:
+	var scene_root: Node = get_tree().current_scene
+	return scene_root.get_node_or_null("BattleSession/BattleHud") as BattleHud
 
 
 func move_to_tile(tile: HexTile) -> void:
