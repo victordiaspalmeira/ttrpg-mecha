@@ -113,12 +113,17 @@ func shake(intensity := 0.08, duration := 0.4) -> void:
 ## Play death animation: fall over + fade out. Returns the tween so caller can await it.
 func play_death() -> Tween:
 	var tween := create_tween()
-	# Fall over (rotate forward)
-	tween.tween_property(_sprite_anchor, "rotation:x", PI / 2.0, 0.4)
-	# Fade out
-	tween.parallel().tween_property(self, "modulate:a", 0.0, 0.5)
+	# Disable billboard so rotation works properly
+	if _material:
+		_material.billboard_mode = StandardMaterial3D.BILLBOARD_DISABLED
+	# Fall over (rotate forward from current rotation)
+	var current_rot := _sprite_anchor.rotation
+	tween.tween_property(_sprite_anchor, "rotation", Vector3(current_rot.x + PI / 2.0, current_rot.y, current_rot.z), 0.5)
+	# Fade out via material alpha
+	if _material:
+		tween.parallel().tween_property(_material, "albedo_color", Color(1, 1, 1, 0), 0.5)
 	# Move down slightly
-	tween.parallel().tween_property(_sprite_anchor, "position:y", _sprite_anchor.position.y - 0.3, 0.4)
+	tween.parallel().tween_property(_sprite_anchor, "position:y", _sprite_anchor.position.y - 0.5, 0.5)
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN)
 	return tween
