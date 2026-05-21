@@ -392,7 +392,7 @@ func _show_result_banner(message: String) -> void:
 func _camera_look_at(target: UnitBase) -> void:
 	if not target or not battle_hud:
 		return
-	var cam_controller := battle_hud.camera_controller
+	var cam_controller: Node3D = battle_hud.camera_controller
 	if cam_controller:
 		cam_controller.focus_on_unit(target)
 
