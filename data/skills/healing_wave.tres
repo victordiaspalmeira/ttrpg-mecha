@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/healing_wave_heal.tres" id="2_heal"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "healing_wave"
+skill_name = "Healing Wave"
+description = "Heals 3 HP to all nearby allies."
+ap_cost = 2
+skill_range = 0
+target_mode = 3
+team_filter = 2
+aoe_radius = 3
+effects = [ExtResource("2_heal")]

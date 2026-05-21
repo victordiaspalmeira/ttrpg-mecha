@@ -72,6 +72,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not battle_flow:
 		return
 
+	# Z key closes the game
+	if event.is_action_pressed("close_game") and not event.is_echo():
+		get_tree().quit()
+		return
+
 	if not event.is_action_pressed("left_click") or event.is_echo():
 		return
 

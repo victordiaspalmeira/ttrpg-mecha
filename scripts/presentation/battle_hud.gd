@@ -52,6 +52,7 @@ var _battle_finished := false
 var _default_hint := "Move, use actions, then end turn."
 var _feedback_restore_timer: SceneTreeTimer = null
 var _pending_skill: SkillData = null
+var _action_name_popup: PanelContainer = null
 
 
 func _ready() -> void:
@@ -273,6 +274,13 @@ func _add_effect_icon(e: ActiveStatusEffect) -> void:
 	else:
 		dur_label.text = str(e.turns_remaining)
 	container.add_child(dur_label)
+	
+	# Pop animation: scale up then bounce back
+	container.scale = Vector2(0.1, 0.1)
+	var pop_tween := create_tween()
+	pop_tween.set_trans(Tween.TRANS_BACK)
+	pop_tween.set_ease(Tween.EASE_OUT)
+	pop_tween.tween_property(container, "scale", Vector2(1, 1), 0.25)
 	
 	effects_container.add_child(container)
 
@@ -511,7 +519,69 @@ func _on_submenu_visibility_changed() -> void:
 			child.queue_free()
 
 
-func show_damage_popup(unit: UnitBase, amount: int) -> void:
+## Shows a centered action name banner at the top of the screen.
+func show_action_name_popup(action_name: String, duration := 1.2) -> void:
+	# Remove existing popup if any
+	if _action_name_popup and is_instance_valid(_action_name_popup):
+		_action_name_popup.queue_free()
+		_action_name_popup = null
+	
+	# Create panel
+	var panel := PanelContainer.new()
+	_action_name_popup = panel
+	
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.06, 0.1, 0.85)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.55, 0.75, 1.0, 0.9)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	style.corner_radius_bottom_left = 8
+	style.content_margin_left = 24
+	style.content_margin_right = 24
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	panel.add_theme_stylebox_override("panel", style)
+	
+	var label := Label.new()
+	label.text = action_name
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", Color(0.85, 0.92, 1.0, 1.0))
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	panel.add_child(label)
+	
+	# Add to tree, position at top center
+	var canvas_layer := CanvasLayer.new()
+	canvas_layer.layer = 10
+	add_child(canvas_layer)
+	canvas_layer.add_child(panel)
+	
+	# Position at top center of screen
+	var screen_size := get_viewport().get_visible_rect().size
+	panel.position = Vector2(screen_size.x / 2 - panel.size.x / 2, 40)
+	
+	# Animate: fade in, hold, fade out
+	panel.modulate.a = 0.0
+	var tween := create_tween()
+	tween.tween_property(panel, "modulate:a", 1.0, 0.15)
+	tween.tween_interval(duration - 0.3)
+	tween.tween_property(panel, "modulate:a", 0.0, 0.15)
+	tween.tween_callback(func():
+		if is_instance_valid(panel):
+			panel.queue_free()
+		_action_name_popup = null
+	)
+
+
+## Shows a floating damage/heal/buff popup above a unit.
+## popup_type: "damage" (red), "heal" (green), "buff" (yellow)
+func show_damage_popup(unit: UnitBase, amount: int, popup_type: String = "damage") -> void:
+	if not is_instance_valid(unit):
+		return
 	var popup = damage_popup_scene.instantiate()
 	damage_popup_container.add_child(popup)
 
@@ -522,9 +592,76 @@ func show_damage_popup(unit: UnitBase, amount: int) -> void:
 	popup.position = Vector2(screen_position.x - 20, screen_position.y - 40)
 
 	var label: Label = popup.get_node("Label")
-	label.text = "-" + str(amount)
+	
+	# Set text and color based on popup type
+	match popup_type:
+		"heal":
+			label.text = "+" + str(amount)
+			label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
+		"buff":
+			label.text = "+" + str(amount)
+			label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))
+		"debuff":
+			label.text = str(amount)
+			label.add_theme_color_override("font_color", Color(0.8, 0.3, 1.0, 1.0))
+		"death":
+			label.text = "DEAD"
+			label.add_theme_color_override("font_color", Color(1.0, 0.15, 0.1, 1.0))
+			label.add_theme_font_size_override("font_size", 16)
+		_:  # damage
+			label.text = "-" + str(amount)
+			label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2, 1.0))
 
+	# Bounce animation: scale up → bounce → fade out
+	popup.scale = Vector2(0.5, 0.5)
 	var tween = create_tween()
-	tween.tween_property(popup, "position", popup.position + Vector2(0, -40), 0.5)
-	tween.parallel().tween_property(popup, "modulate:a", 0.0, 0.5)
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(popup, "scale", Vector2(1.3, 1.3), 0.15)
+	tween.tween_property(popup, "scale", Vector2(1.0, 1.0), 0.1)
+	tween.tween_property(popup, "position", popup.position + Vector2(0, -40), 0.4)
+	tween.parallel().tween_property(popup, "modulate:a", 0.0, 0.4)
+	tween.finished.connect(popup.queue_free)
+
+
+## Shows a floating damage/heal/buff popup at a world position (for dead units).
+## popup_type: "damage" (red), "heal" (green), "buff" (yellow)
+func show_damage_popup_at_position(world_position: Vector3, amount: int, popup_type: String = "damage") -> void:
+	var popup = damage_popup_scene.instantiate()
+	damage_popup_container.add_child(popup)
+
+	var screen_position = camera.unproject_position(world_position + Vector3.UP * 1.5)
+
+	popup.position = Vector2(screen_position.x - 20, screen_position.y - 40)
+
+	var label: Label = popup.get_node("Label")
+	
+	# Set text and color based on popup type
+	match popup_type:
+		"heal":
+			label.text = "+" + str(amount)
+			label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
+		"buff":
+			label.text = "+" + str(amount)
+			label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))
+		"debuff":
+			label.text = str(amount)
+			label.add_theme_color_override("font_color", Color(0.8, 0.3, 1.0, 1.0))
+		"death":
+			label.text = "DEAD"
+			label.add_theme_color_override("font_color", Color(1.0, 0.15, 0.1, 1.0))
+			label.add_theme_font_size_override("font_size", 16)
+		_:  # damage
+			label.text = "-" + str(amount)
+			label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2, 1.0))
+
+	# Bounce animation: scale up → bounce → fade out
+	popup.scale = Vector2(0.5, 0.5)
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(popup, "scale", Vector2(1.3, 1.3), 0.15)
+	tween.tween_property(popup, "scale", Vector2(1.0, 1.0), 0.1)
+	tween.tween_property(popup, "position", popup.position + Vector2(0, -40), 0.4)
+	tween.parallel().tween_property(popup, "modulate:a", 0.0, 0.4)
 	tween.finished.connect(popup.queue_free)

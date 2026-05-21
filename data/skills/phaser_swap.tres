@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/phaser_swap.tres" id="2_eff"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "phaser_swap"
+skill_name = "Swap"
+description = "Swap places with a unit up to 5 tiles away."
+ap_cost = 1
+range = 5
+target_mode = 1   # assuming target unit
+team_filter = 2   # enemy or ally?
+aoe_radius = 0
+effects = [ExtResource("2_eff")]
+</resource>

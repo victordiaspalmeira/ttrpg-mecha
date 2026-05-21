@@ -9,4 +9,4 @@ weapon_name = "Starter Rifle"
 weapon_range = 3
 attack_ap_cost = 2
 tags = Array[String](["rifle", "ranged"])
-weapon_power = 3
+weapon_power = 4

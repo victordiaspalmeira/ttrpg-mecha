@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PassiveEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/passive_effect.gd" id="1_p"]
+
+[resource]
+script = ExtResource("1_p")
+passive_type = 2
+display_name = "Judge's Condemnation"
+description = "On kill: gain +1 Condemnation stack. Each stack boosts attack and defense."
+stat_name = "attack_power"
+stat_value = 1

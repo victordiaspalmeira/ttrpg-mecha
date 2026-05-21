@@ -2,6 +2,8 @@ class_name BattleFlow
 extends Node
 
 signal move_executed(unit: UnitBase, target_tile: HexTile)
+signal attack_executed(attacker: UnitBase, target: UnitBase)
+signal target_hit(target: UnitBase, damage: int)
 
 @export var encounter: EncounterData
 
@@ -19,6 +21,8 @@ var battle_input: BattleInput = null
 var enemy_brain: EnemyBrain = null
 var audio_manager: AudioManager = null
 var path_preview: GridPathPreview = null
+var particle_manager: ParticleManager = null
+var cinematic_player: CinematicPlayer = null
 
 var _battle_over: bool = false
 var _winner_team: String = ""
@@ -59,6 +63,9 @@ func setup(
 
 
 func start_battle() -> void:
+	# If GameManager has a selected encounter (e.g. from MapEditor), use it
+	if GameManager and GameManager.selected_encounter:
+		encounter = GameManager.selected_encounter as EncounterData
 	grid_manager.initialize(encounter)
 	_spawn_encounter()
 	turn_controller.build_turn_queue()
@@ -171,10 +178,13 @@ func try_move_to_hovered_tile() -> bool:
 		battle_hud.show_action_feedback(
 			MovementRules.get_move_failure_reason(unit, target_tile, grid_manager)
 		)
+		# Flash tile red for invalid move feedback
+		_flash_tile_red(target_tile)
 		return false
 
 	var moved: bool = execute_move(unit, target_tile)
 	if moved:
+		battle_hud.show_action_name_popup("Move")
 		selection_state.set_action_mode(SelectionState.ActionMode.NONE)
 		_clear_path_preview()
 
@@ -241,13 +251,101 @@ func try_attack_unit(target_unit: UnitBase) -> bool:
 func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 	var damage: int = attacker.get_total_attack_power()
 
-	if not combat_resolver.execute_attack(attacker, target):
+	# Validate attack (range, AP) without applying damage yet
+	if not combat_resolver.can_attack(attacker, target):
 		return false
 
-	attacker.play_attack_visual()
-	battle_hud.show_damage_popup(target, damage)
-	battle_hud.update_resource_display(attacker)
+	# Spend AP upfront
+	var ap_cost: int = attacker.get_attack_ap_cost()
+	if not attacker.spend_ap(ap_cost):
+		return false
+
+	# Trigger BEFORE_ATTACK event
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.BEFORE_ATTACK, attacker, {"target": target})
+
+	# Show action name popup
+	var weapon := attacker.get_active_weapon()
+	var action_name := weapon.weapon_name if weapon else "Attack"
+	battle_hud.show_action_name_popup(action_name)
+
+	# Cache data before cinematic
+	var target_pos_cached: Vector3 = target.global_position
+	var target_ref: WeakRef = weakref(target)
+
+	if cinematic_player:
+		# Cinematic controls when damage is applied
+		cinematic_player.play_attack_cinematic(attacker, target, func():
+			# Apply actual damage at impact moment
+			_apply_attack_damage(attacker, target, damage)
+			# Show damage popup
+			var target_unit: UnitBase = target_ref.get_ref() as UnitBase
+			if target_unit and is_instance_valid(target_unit):
+				battle_hud.show_damage_popup(target_unit, damage)
+			else:
+				battle_hud.show_damage_popup_at_position(target_pos_cached, damage)
+			battle_hud.update_resource_display(attacker)
+		, particle_manager)
+	else:
+		# Fallback without cinematic - apply damage immediately
+		attacker.play_attack_visual()
+		if particle_manager:
+			var start_pos := attacker.global_position + Vector3.UP * 0.5
+			var end_pos := target.global_position + Vector3.UP * 0.5
+			particle_manager.play_projectile(ParticleConfig.EffectType.ATTACK_BULLET, start_pos, end_pos)
+		_apply_attack_damage(attacker, target, damage)
+		battle_hud.show_damage_popup(target, damage)
+		battle_hud.update_resource_display(attacker)
+	
 	return true
+
+
+## Applies the actual damage and triggers post-attack events
+func _apply_attack_damage(attacker: UnitBase, target: UnitBase, damage: int) -> void:
+	if not is_instance_valid(target):
+		return
+	target.take_damage(damage)
+	# Trigger AFTER_ATTACK + ON_DAMAGE_DEALT events
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.AFTER_ATTACK, attacker, {"target": target, "damage": damage})
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.ON_DAMAGE_DEALT, attacker, {"target": target, "damage": damage})
+	# Trigger ON_KILL if target died
+	if is_instance_valid(target) and target.current_hp <= 0:
+		PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.ON_KILL, attacker, {"victim": target})
+	attack_executed.emit(attacker, target)
+	target_hit.emit(target, damage)
+
+
+## Shows a brief attack line between attacker and target.
+func _show_attack_line(attacker: UnitBase, target: UnitBase) -> void:
+	var line := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.radial_segments = 4
+	mesh.top_radius = 0.02
+	mesh.bottom_radius = 0.02
+	mesh.height = 1.0  # will be scaled
+	line.mesh = mesh
+	
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.8, 0.2, 0.8)
+	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	line.material_override = mat
+	
+	_world.add_child(line)
+	
+	var start_pos := attacker.global_position + Vector3.UP * 0.5
+	var end_pos := target.global_position + Vector3.UP * 0.5
+	var mid_point := (start_pos + end_pos) / 2.0
+	var direction := (end_pos - start_pos)
+	var length := direction.length()
+	
+	line.global_position = mid_point
+	line.look_at(end_pos, Vector3.UP)
+	line.scale = Vector3(1, 1, length)
+	
+	# Fade out
+	var tween := create_tween()
+	tween.tween_property(line, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(line.queue_free)
 
 
 func end_turn() -> void:
@@ -335,6 +433,67 @@ func _finish_battle(winner_team_id: String) -> void:
 
 func _show_result_banner(message: String) -> void:
 	await battle_hud.show_battle_result(message)
+	# Wait for the popup to finish, then quit
+	await get_tree().create_timer(2.0).timeout
+	get_tree().quit()
+
+
+## Briefly focuses the camera on a target position.
+func _camera_look_at(target: UnitBase) -> void:
+	if not target or not battle_hud:
+		return
+	var cam_controller: Node3D = battle_hud.camera_controller
+	if cam_controller:
+		cam_controller.focus_on_unit(target)
+
+
+## Shows a brief impact effect at the target position.
+func _show_impact_effect(target: UnitBase) -> void:
+	if not target:
+		return
+	# Create a simple expanding ring effect
+	var ring := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.radial_segments = 16
+	mesh.top_radius = 0.3
+	mesh.bottom_radius = 0.3
+	mesh.height = 0.02
+	ring.mesh = mesh
+	ring.global_position = target.global_position + Vector3.UP * 0.1
+	
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.8, 0.2, 0.7)
+	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	ring.material_override = mat
+	
+	_world.add_child(ring)
+	
+	# Expand and fade
+	var tween := create_tween()
+	tween.tween_property(ring, "scale", Vector3(2.5, 1, 2.5), 0.3)
+	tween.parallel().tween_property(ring, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(ring.queue_free)
+
+
+## Flashes a tile red briefly to indicate invalid action.
+func _flash_tile_red(tile: HexTile) -> void:
+	if not tile or not tile.highlight_overlay:
+		return
+	var overlay := tile.highlight_overlay
+	overlay.visible = true
+	# Create a red material for the flash
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.2, 0.2, 0.6)
+	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
+	overlay.material_override = mat
+	# Fade out
+	var tween := create_tween()
+	tween.tween_property(overlay, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(func():
+		overlay.visible = false
+		overlay.modulate.a = 1.0
+	)
 
 
 func _refresh_action_highlights() -> void:
@@ -370,5 +529,23 @@ func _bootstrap() -> void:
 		session.get_node("EnemyBrain") as EnemyBrain,
 		session.get_node("AudioManager") as AudioManager,
 	)
+
+	# Initialize particle manager
+	particle_manager = session.get_node("ParticleManager") as ParticleManager
+	if not particle_manager:
+		particle_manager = ParticleManager.new()
+		particle_manager.name = "ParticleManager"
+		session.add_child(particle_manager)
+
+	# Initialize cinematic player
+	cinematic_player = session.get_node_or_null("CinematicPlayer") as CinematicPlayer
+	if not cinematic_player:
+		cinematic_player = CinematicPlayer.new()
+		cinematic_player.name = "CinematicPlayer"
+		session.add_child(cinematic_player)
+
+	# Connect passive feedback callback
+	PassiveSystem.feedback_callback = func(unit: UnitBase, text: String, color: Color):
+		PassiveFeedback.show(unit, text, color)
 
 	start_battle()

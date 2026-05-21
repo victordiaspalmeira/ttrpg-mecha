@@ -1,6 +1,15 @@
 class_name SkillExecutor
 extends Node
 
+var cinematic_player: CinematicPlayer = null
+
+
+func _ready() -> void:
+	var session := get_parent()
+	if session:
+		cinematic_player = session.get_node_or_null("CinematicPlayer") as CinematicPlayer
+
+
 ## Executes a skill given a context. Returns true on success.
 func execute(ctx: SkillContext) -> bool:
 	if not _validate_targeting(ctx):
@@ -12,6 +21,8 @@ func execute(ctx: SkillContext) -> bool:
 	# Handle toggle skills (e.g., Turret Mode — if already active, remove it)
 	if _is_toggle_skill(ctx):
 		if _toggle_off(ctx):
+			# Play toggle-off particle effect
+			_play_skill_particles(ctx, true)
 			return true
 
 	# Apply skill effects to all affected units
@@ -28,7 +39,165 @@ func execute(ctx: SkillContext) -> bool:
 	for status: StatusEffect in ctx.skill.self_effects:
 		ctx.caster.add_effect(status, ctx.caster.unit_name)
 
+	# Trigger AFTER_SKILL event (Volt Charge: +1 Charge stack on any action)
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.AFTER_SKILL, ctx.caster, {"skill": ctx.skill})
+
+	# Play skill cinematic + particles
+	if cinematic_player and not ctx.affected_units.is_empty():
+		var primary_effect := _determine_particle_effect(ctx, false)
+		cinematic_player.play_skill_cinematic(ctx.caster, ctx.affected_units, primary_effect, func():
+			# Show action name popup after cinematic
+			var battle_hud := _get_battle_hud(ctx.caster)
+			if battle_hud:
+				battle_hud.show_action_name_popup(ctx.skill.skill_name)
+		, _get_particle_manager(ctx.caster))
+	else:
+		# Fallback: just play particles
+		_play_skill_particles(ctx, false)
+
+	# Play skill SFX
+	var audio_manager := _get_audio_manager(ctx.caster)
+	if audio_manager:
+		audio_manager.play_skill_sfx(ctx.skill.skill_id)
+
+	# Show action name popup
+	var battle_hud := _get_battle_hud(ctx.caster)
+	if battle_hud:
+		battle_hud.show_action_name_popup(ctx.skill.skill_name)
+
 	return true
+
+
+## Play particle effects based on skill type and effects
+func _play_skill_particles(ctx: SkillContext, is_toggle_off: bool) -> void:
+	var particle_manager := _get_particle_manager(ctx.caster)
+	if not particle_manager:
+		return
+	
+	# Determine particle effect based on skill effects
+	var primary_effect := _determine_particle_effect(ctx, is_toggle_off)
+	
+	# Play AOE ring for AOE skills
+	if ctx.skill.target_mode == SkillData.TargetMode.AOE_CIRCLE and ctx.skill.aoe_radius > 0:
+		var center_pos := ctx.caster.global_position + Vector3.UP * 0.1
+		if ctx.target_tile:
+			center_pos = ctx.target_tile.global_position + Vector3.UP * 0.1
+		particle_manager.play_aoe_ring(center_pos, ctx.skill.aoe_radius)
+	
+	# Play effect on each affected unit
+	for unit: UnitBase in ctx.affected_units:
+		var effect_pos := unit.global_position + Vector3.UP * 0.5
+		particle_manager.play_effect(primary_effect, effect_pos)
+		
+		# Play additional status-specific particles
+		for status: StatusEffect in ctx.skill.status_effects:
+			var status_particle := _get_status_particle(status.effect_id)
+			if status_particle != -1:
+				particle_manager.play_effect(status_particle, unit.global_position + Vector3.UP * 0.8)
+
+
+## Determine the primary particle effect for a skill
+func _determine_particle_effect(ctx: SkillContext, is_toggle_off: bool) -> int:
+	if is_toggle_off:
+		return ParticleConfig.EffectType.SKILL_TELEPORT
+	
+	# Check skill ID for specific effects
+	match ctx.skill.skill_id:
+		"grenade":
+			return ParticleConfig.EffectType.SKILL_DAMAGE_FIRE
+		"suppression":
+			return ParticleConfig.EffectType.SKILL_DAMAGE_GENERIC
+		"adrenaline_rush":
+			return ParticleConfig.EffectType.SKILL_BUFF_UP
+		"fortify":
+			return ParticleConfig.EffectType.SKILL_SHIELD
+		"shield_bash":
+			return ParticleConfig.EffectType.ATTACK_SLASH
+		"taunt":
+			return ParticleConfig.EffectType.SKILL_TAUNT
+		"precision_shot":
+			return ParticleConfig.EffectType.ATTACK_BULLET
+		"armor_piercer":
+			return ParticleConfig.EffectType.ATTACK_BULLET
+		"turret_mode":
+			return ParticleConfig.EffectType.SKILL_TURRET_DEPLOY
+		"shock_trooper":
+			return ParticleConfig.EffectType.SKILL_DAMAGE_ELECTRIC
+		"energize":
+			return ParticleConfig.EffectType.SKILL_BUFF_UP
+		"thunder":
+			return ParticleConfig.EffectType.SKILL_DAMAGE_ELECTRIC
+		"healing_wave":
+			return ParticleConfig.EffectType.SKILL_HEAL
+		"regen_shield":
+			return ParticleConfig.EffectType.SKILL_HEAL
+		"combat_stim":
+			return ParticleConfig.EffectType.SKILL_BUFF_UP
+		"accusation":
+			return ParticleConfig.EffectType.SKILL_DEBUFF_DOWN
+		"judgement":
+			return ParticleConfig.EffectType.SKILL_DAMAGE_GENERIC
+		"execution":
+			return ParticleConfig.EffectType.SKILL_DAMAGE_GENERIC
+		_:
+			pass
+	
+	# Determine from effect types
+	for effect: SkillEffect in ctx.skill.effects:
+		match effect.effect_type:
+			SkillEffect.EffectType.DAMAGE:
+				return ParticleConfig.EffectType.SKILL_DAMAGE_GENERIC
+			SkillEffect.EffectType.HEAL:
+				return ParticleConfig.EffectType.SKILL_HEAL
+			SkillEffect.EffectType.BUFF:
+				return ParticleConfig.EffectType.SKILL_BUFF_UP
+			SkillEffect.EffectType.DEBUFF:
+				return ParticleConfig.EffectType.SKILL_DEBUFF_DOWN
+			_:
+				pass
+	
+	# Check self-effects
+	for status: StatusEffect in ctx.skill.self_effects:
+		var status_particle := _get_status_particle(status.effect_id)
+		if status_particle != -1:
+			return status_particle
+	
+	return ParticleConfig.EffectType.SKILL_DAMAGE_GENERIC
+
+
+## Get particle effect type for a status effect ID
+func _get_status_particle(status_id: String) -> int:
+	match status_id:
+		"slow":
+			return ParticleConfig.EffectType.STATUS_SLOW
+		"shatter":
+			return ParticleConfig.EffectType.STATUS_SHATTER
+		"weaken":
+			return ParticleConfig.EffectType.STATUS_WEAKEN
+		"haste":
+			return ParticleConfig.EffectType.STATUS_HASTE
+		"power_up":
+			return ParticleConfig.EffectType.STATUS_POWER_UP
+		"fortify":
+			return ParticleConfig.EffectType.STATUS_FORTIFY
+		"energize":
+			return ParticleConfig.EffectType.STATUS_HASTE
+		_:
+			return -1
+
+
+## Get the particle manager from the scene
+func _get_particle_manager(unit: UnitBase) -> ParticleManager:
+	var scene_root: Node = unit.get_tree().current_scene
+	var session := scene_root.get_node_or_null("BattleSession")
+	if not session:
+		return null
+	return session.get_node_or_null("ParticleManager") as ParticleManager
+
+
+func _get_battle_hud(unit: UnitBase) -> BattleHud:
+	var scene_root: Node = unit.get_tree().current_scene
+	return scene_root.get_node_or_null("BattleSession/BattleHud") as BattleHud
 
 
 ## Returns true if this is a toggle skill (SELF target + has self-effects with duration -1).
@@ -150,3 +319,10 @@ func _apply_stat_modifier(effect: SkillEffect, target: UnitBase) -> void:
 	status.duration = effect.duration
 	status.modifiers[effect.stat_name] = effect.stat_modifier
 	target.add_effect(status, target.unit_name)
+
+
+func _get_audio_manager(unit: UnitBase) -> AudioManager:
+	var scene_root: Node = unit.get_tree().current_scene
+	return scene_root.get_node_or_null("BattleSession/AudioManager") as AudioManager
+
+

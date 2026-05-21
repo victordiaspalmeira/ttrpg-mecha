@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SkillEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_effect.gd" id="1_e"]
+[ext_resource type="Resource" path="res://data/status_effects/regen.tres" id="2_regen"]
+
+[resource]
+script = ExtResource("1_e")
+effect_type = 2
+status_effect = ExtResource("2_regen")

@@ -35,9 +35,20 @@ func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 	if not attacker.spend_ap(ap_cost):
 		return false
 
+	# Trigger BEFORE_ATTACK event
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.BEFORE_ATTACK, attacker, {"target": target})
+
 	# Damage formula: (attack_power + weapon_power) - target.defense
 	var total_damage: int = attacker.get_total_attack_power()
 	target.take_damage(total_damage)
+
+	# Trigger AFTER_ATTACK + ON_DAMAGE_DEALT events
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.AFTER_ATTACK, attacker, {"target": target, "damage": total_damage})
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.ON_DAMAGE_DEALT, attacker, {"target": target, "damage": total_damage})
+
+	# Trigger ON_KILL if target died
+	if target.current_hp <= 0:
+		PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.ON_KILL, attacker, {"victim": target})
 
 	attack_executed.emit(attacker, target)
 	target_hit.emit(target, total_damage)

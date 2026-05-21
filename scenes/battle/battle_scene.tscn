@@ -26,6 +26,7 @@
 [ext_resource type="AudioStream" uid="uid://b5rqp4mufwlf7" path="res://assets/audio/UI_Menu/070_Equip_10.wav" id="audio_turn_start"]
 [ext_resource type="Script" uid="uid://dm2chm2doul65" path="res://scripts/presentation/grid_path_preview.gd" id="grid_path_preview"]
 [ext_resource type="Script" uid="uid://skill_executor" path="res://scripts/skills/skill_executor.gd" id="skill_exec"]
+[ext_resource type="Script" uid="uid://particle_mgr" path="res://scripts/systems/particle_manager.gd" id="particle_mgr"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action"]
 content_margin_left = 12.0
@@ -123,6 +124,10 @@ script = ExtResource("skill_exec")
 unique_name_in_owner = true
 script = ExtResource("19_audio")
 
+[node name="ParticleManager" type="Node" parent="BattleSession" unique_id=1850000001]
+unique_name_in_owner = true
+script = ExtResource("particle_mgr")
+
 [node name="AudioAttack" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=915229391]
 unique_name_in_owner = true
 volume_db = -10.0
@@ -157,6 +162,38 @@ volume_db = -15.0
 unique_name_in_owner = true
 stream = ExtResource("audio_turn_start")
 volume_db = -5.0
+
+[node name="AudioSkillBuff" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000001]
+unique_name_in_owner = true
+volume_db = -10.0
+
+[node name="AudioSkillDebuff" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000002]
+unique_name_in_owner = true
+volume_db = -10.0
+
+[node name="AudioSkillHeal" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000003]
+unique_name_in_owner = true
+volume_db = -10.0
+
+[node name="AudioSkillDamage" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000004]
+unique_name_in_owner = true
+volume_db = -10.0
+
+[node name="AudioSkillTurret" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000005]
+unique_name_in_owner = true
+volume_db = -10.0
+
+[node name="AudioSkillTaunt" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000006]
+unique_name_in_owner = true
+volume_db = -10.0
+
+[node name="AudioSkillGrenade" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000007]
+unique_name_in_owner = true
+volume_db = -10.0
+
+[node name="AudioInvalid" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000008]
+unique_name_in_owner = true
+volume_db = -15.0
 
 [node name="World" type="Node3D" parent="." unique_id=893958307]
 unique_name_in_owner = true

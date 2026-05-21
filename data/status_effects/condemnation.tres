@@ -1,0 +1,12 @@
+[gd_resource type="StatusEffect" format=3]
+[ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+[resource]
+script = ExtResource("1_s")
+effect_id = "condemnation"
+display_name = "Condemnation"
+description = "Buff permanente que aumenta ataque e defesa baseado em stacks."
+duration = -1
+modifiers = {
+    "attack_power": 0,
+    "defense": 0
+}

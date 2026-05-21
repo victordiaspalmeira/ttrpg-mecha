@@ -146,7 +146,10 @@ func get_effective_range() -> int:
 				if not has_tag:
 					range_mod = 0  # weapon doesn't qualify
 	
-	return maxi(1, attack_range + range_mod)
+	# Add conditional range bonuses (e.g. Eagle Eye: +1 with ranged weapon)
+	var conditional_range := PassiveSystem.get_conditional_range(self)
+	
+	return maxi(1, attack_range + range_mod + conditional_range)
 
 
 ## Returns list of allowed weapon tags for effects that modify a given stat.
@@ -212,12 +215,21 @@ func reduce_cooldowns() -> void:
 
 
 func take_damage(amount: int) -> void:
+	var resistance := PassiveSystem.get_damage_resistance(self)
 	var effective_defense := maxi(
 		1,
-		defense + get_effect_modifier("defense")
+		defense + get_effect_modifier("defense") + resistance
 	)
 	var final_damage = maxi(1, amount - effective_defense)
+
+	# Trigger ON_DAMAGE_TAKEN event
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.ON_DAMAGE_TAKEN, self, {"damage": final_damage})
 	current_hp -= final_damage
+
+	# Visual feedback: flash white + shake
+	if _unit_visual:
+		_unit_visual.flash_white()
+		_unit_visual.shake()
 
 	if current_hp <= 0:
 		die()
@@ -229,7 +241,33 @@ func heal(amount: int) -> void:
 
 func die() -> void:
 	died.emit()
+	
+	# Play death animation
+	if _unit_visual:
+		var tween := _unit_visual.play_death()
+		# Play death SFX
+		var audio_manager := _get_audio_manager()
+		if audio_manager:
+			audio_manager.play_death()
+		# Show "DEAD" popup
+		var battle_hud := _get_battle_hud()
+		if battle_hud:
+			battle_hud.show_damage_popup(self, 0, "death")
+		# Wait for animation to finish before freeing
+		if tween:
+			await tween.finished
+	
 	queue_free()
+
+
+func _get_audio_manager() -> AudioManager:
+	var scene_root: Node = get_tree().current_scene
+	return scene_root.get_node_or_null("BattleSession/AudioManager") as AudioManager
+
+
+func _get_battle_hud() -> BattleHud:
+	var scene_root: Node = get_tree().current_scene
+	return scene_root.get_node_or_null("BattleSession/BattleHud") as BattleHud
 
 
 func move_to_tile(tile: HexTile) -> void:
@@ -305,23 +343,16 @@ func _apply_passives() -> void:
 	if not class_data:
 		return
 	_passive_bonuses.clear()
-	for passive: PassiveEffect in class_data.passives:
-		match passive.passive_type:
-			PassiveEffect.PassiveType.FLAT_STAT_BONUS:
-				_passive_bonuses[passive.stat_name] = passive.stat_value
-				if passive.stat_name == "defense":
-					defense += passive.stat_value
-				elif passive.stat_name == "attack_range":
-					# Only apply range bonus if condition allows current weapon
-					if passive.condition == "ranged_only":
-						var weapon := get_active_weapon()
-						if weapon and _is_ranged_weapon(weapon):
-							attack_range += passive.stat_value
-					else:
-						attack_range += passive.stat_value
-			PassiveEffect.PassiveType.CONDITIONAL_BONUS:
-				_passive_bonuses[passive.stat_name] = passive.stat_value
-				_passive_bonuses["condition_%s" % passive.stat_name] = passive.condition
+	
+	# Use PassiveSystem for flat bonuses only
+	var flat_bonuses := PassiveSystem.apply_flat_bonuses(self)
+	for stat: String in flat_bonuses:
+		var value: int = flat_bonuses[stat]
+		_passive_bonuses[stat] = _passive_bonuses.get(stat, 0) + value
+		if stat == "defense":
+			defense += value
+		# Note: attack_range with conditions (Eagle Eye) is now evaluated at runtime
+		# via get_effective_range(), not applied here.
 
 
 ## Returns true if the weapon is ranged (has tag "ranged").
@@ -357,21 +388,32 @@ func _apply_combat_stats() -> void:
 
 
 ## Returns total attack power: base attack + weapon power + effects + passives.
-func get_total_attack_power() -> int:
+func get_total_attack_power(p_target_distance: int = -1) -> int:
 	var weapon := get_active_weapon()
 	var wp := weapon.weapon_power if weapon else 1
 	var mod := get_effect_modifier("attack_power")
 	var total := attack_power + wp + mod
 	
-	# Apply conditional passives (e.g. Close Quarters: +1 at range <= 2)
-	if _passive_bonuses.has("attack_power"):
-		var condition: String = _passive_bonuses.get("condition_attack_power", "")
-		if condition == "range_le_2":
-			var target_unit: UnitBase = _get_hovered_unit()
-			if target_unit and current_tile and target_unit.current_tile:
-				var dist: int = HexMath.axial_distance_tiles(current_tile, target_unit.current_tile)
-				if dist <= 2:
-					total += _passive_bonuses["attack_power"]
+	# Trigger AFTER_ATTACK event first (Volt Charge: +1 stack)
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.AFTER_ATTACK, self, {})
+	
+	# Determine target distance for conditional passives (Close Quarters)
+	var dist: int = p_target_distance
+	if dist < 0:
+		var target_unit: UnitBase = _get_hovered_unit()
+		if target_unit and current_tile and target_unit.current_tile:
+			dist = HexMath.axial_distance_tiles(current_tile, target_unit.current_tile)
+	
+	# Apply conditional passives via PassiveSystem (Close Quarters: +1 at range <= 2)
+	var ctx := PassiveSystem.PassiveContext.new(self, null, dist)
+	var conditional_bonus := PassiveSystem.get_total_bonus(self, "attack_power", ctx)
+	total += conditional_bonus
+	
+	# Volt Charge: add damage multiplier stacks and consume one
+	var charge_stacks := PassiveSystem.get_damage_multiplier(self)
+	if charge_stacks > 0:
+		total += charge_stacks
+		PassiveSystem.consume_damage_multiplier(self)
 	
 	return maxi(1, total)
 

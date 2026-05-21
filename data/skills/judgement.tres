@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/judgement_damage.tres" id="2_dmg"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "judgement"
+skill_name = "Judgement"
+description = "Deal 4 damage. Deals double damage (8) if target is Accused."
+ap_cost = 2
+skill_range = 3
+target_mode = 1
+team_filter = 1
+effects = [ExtResource("2_dmg")]

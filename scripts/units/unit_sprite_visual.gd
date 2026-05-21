@@ -85,6 +85,40 @@ func play_attack() -> void:
 		play(default_animation)
 
 
+## Flash white on damage taken.
+func flash_white(duration := 0.25) -> void:
+	if _material:
+		var original_color := _material.albedo_color
+		_material.albedo_color = Color(1, 1, 1, 1)
+		var tween := create_tween()
+		tween.tween_property(_material, "albedo_color", original_color, duration)
+
+
+## Shake the unit when taking damage.
+func shake(intensity := 0.08, duration := 0.4) -> void:
+	var original_pos := _sprite_anchor.position
+	var tween := create_tween()
+	var elapsed := 0.0
+	while elapsed < duration:
+		var offset := Vector3(
+			randf_range(-intensity, intensity),
+			randf_range(-intensity, intensity),
+			randf_range(-intensity, intensity)
+		)
+		tween.tween_property(_sprite_anchor, "position", original_pos + offset, 0.05)
+		elapsed += 0.05
+	tween.tween_property(_sprite_anchor, "position", original_pos, 0.05)
+
+
+## Play death animation: fade out only (disabled rotation for now). Returns the tween so caller can await it.
+func play_death() -> Tween:
+	var tween := create_tween()
+	# Simple fade out via material alpha
+	if _material:
+		tween.tween_property(_material, "albedo_color", Color(1, 1, 1, 0), 0.5)
+	return tween
+
+
 func play_one_shot(animation_name: String, return_animation: String) -> void:
 	if sprite_frames == null or not sprite_frames.has_animation(animation_name):
 		play(return_animation)

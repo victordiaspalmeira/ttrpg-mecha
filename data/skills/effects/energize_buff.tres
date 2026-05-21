@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SkillEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_effect.gd" id="1_e"]
+
+[resource]
+script = ExtResource("1_e")
+effect_type = 4
+stat_name = "attack_power"
+stat_modifier = 1
+duration = 2

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/energize_buff.tres" id="2_buff"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "energize"
+skill_name = "Energize"
+description = "Surge with electrical energy. Generates Charge and boosts attack power."
+ap_cost = 2
+skill_range = 0
+target_mode = 0
+team_filter = 3
+effects = [ExtResource("2_buff")]
