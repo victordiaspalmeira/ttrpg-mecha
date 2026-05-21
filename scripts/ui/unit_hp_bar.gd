@@ -48,6 +48,14 @@ func set_hp(
 	max_hp = maxi(1, p_max_hp)
 
 	update_texture()
+	# Flash red on damage
+	_flash_damage()
+
+
+func _flash_damage() -> void:
+	modulate = Color(1.5, 0.3, 0.3, 1.0)
+	var tween := create_tween()
+	tween.tween_property(self, "modulate", Color(1, 1, 1, 1), 0.3)
 
 
 func update_texture() -> void:

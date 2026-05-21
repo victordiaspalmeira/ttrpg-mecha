@@ -610,7 +610,13 @@ func show_damage_popup(unit: UnitBase, amount: int, popup_type: String = "damage
 			label.text = "-" + str(amount)
 			label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2, 1.0))
 
+	# Bounce animation: scale up → bounce → fade out
+	popup.scale = Vector2(0.5, 0.5)
 	var tween = create_tween()
-	tween.tween_property(popup, "position", popup.position + Vector2(0, -40), 0.5)
-	tween.parallel().tween_property(popup, "modulate:a", 0.0, 0.5)
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(popup, "scale", Vector2(1.3, 1.3), 0.15)
+	tween.tween_property(popup, "scale", Vector2(1.0, 1.0), 0.1)
+	tween.tween_property(popup, "position", popup.position + Vector2(0, -40), 0.4)
+	tween.parallel().tween_property(popup, "modulate:a", 0.0, 0.4)
 	tween.finished.connect(popup.queue_free)
