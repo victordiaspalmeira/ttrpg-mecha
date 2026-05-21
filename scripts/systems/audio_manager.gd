@@ -37,8 +37,8 @@ func setup(
 	_turn_controller = p_turn_controller
 	_battle_flow = p_battle_flow
 
-	_combat_resolver.attack_executed.connect(_on_attack_executed)
-	_combat_resolver.target_hit.connect(_on_target_hit)
+	_battle_flow.attack_executed.connect(_on_attack_executed)
+	_battle_flow.target_hit.connect(_on_target_hit)
 	_turn_controller.turn_ended.connect(_on_turn_ended)
 	_battle_flow.move_executed.connect(_on_move_executed)
 

@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_p")
-passive_type = 0
+passive_type = 1
 display_name = "Eagle Eye"
 description = "+1 weapon range"
 stat_name = "attack_range"

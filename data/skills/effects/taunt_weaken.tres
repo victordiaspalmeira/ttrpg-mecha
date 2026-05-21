@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="SkillEffect" format=3]
 
 [ext_resource type="Script" path="res://scripts/skills/skill_effect.gd" id="1_e"]
-[ext_resource type="Resource" path="res://data/status_effects/weaken.tres" id="2_s"]
+[ext_resource type="Resource" path="res://data/status_effects/taunt_weaken.tres" id="2_s"]
 
 [resource]
 script = ExtResource("1_e")

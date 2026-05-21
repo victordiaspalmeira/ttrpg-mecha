@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/phaser_damage.tres" id="2_eff"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "phaser_damage"
+skill_name = "Momentum Damage"
+description = "Deal damage equal to the number of tiles moved this turn."
+ap_cost = 1
+range = 0
+target_mode = 0
+team_filter = 0
+aoe_radius = 0
+effects = [ExtResource("2_eff")]
+</resource>

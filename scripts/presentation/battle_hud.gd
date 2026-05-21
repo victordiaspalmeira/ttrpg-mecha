@@ -580,12 +580,57 @@ func show_action_name_popup(action_name: String, duration := 1.2) -> void:
 ## Shows a floating damage/heal/buff popup above a unit.
 ## popup_type: "damage" (red), "heal" (green), "buff" (yellow)
 func show_damage_popup(unit: UnitBase, amount: int, popup_type: String = "damage") -> void:
+	if not is_instance_valid(unit):
+		return
 	var popup = damage_popup_scene.instantiate()
 	damage_popup_container.add_child(popup)
 
 	var screen_position = camera.unproject_position(
 		unit.global_position + Vector3.UP * (unit.get_visual_top_y() + 0.25)
 	)
+
+	popup.position = Vector2(screen_position.x - 20, screen_position.y - 40)
+
+	var label: Label = popup.get_node("Label")
+	
+	# Set text and color based on popup type
+	match popup_type:
+		"heal":
+			label.text = "+" + str(amount)
+			label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4, 1.0))
+		"buff":
+			label.text = "+" + str(amount)
+			label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))
+		"debuff":
+			label.text = str(amount)
+			label.add_theme_color_override("font_color", Color(0.8, 0.3, 1.0, 1.0))
+		"death":
+			label.text = "DEAD"
+			label.add_theme_color_override("font_color", Color(1.0, 0.15, 0.1, 1.0))
+			label.add_theme_font_size_override("font_size", 16)
+		_:  # damage
+			label.text = "-" + str(amount)
+			label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2, 1.0))
+
+	# Bounce animation: scale up → bounce → fade out
+	popup.scale = Vector2(0.5, 0.5)
+	var tween = create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(popup, "scale", Vector2(1.3, 1.3), 0.15)
+	tween.tween_property(popup, "scale", Vector2(1.0, 1.0), 0.1)
+	tween.tween_property(popup, "position", popup.position + Vector2(0, -40), 0.4)
+	tween.parallel().tween_property(popup, "modulate:a", 0.0, 0.4)
+	tween.finished.connect(popup.queue_free)
+
+
+## Shows a floating damage/heal/buff popup at a world position (for dead units).
+## popup_type: "damage" (red), "heal" (green), "buff" (yellow)
+func show_damage_popup_at_position(world_position: Vector3, amount: int, popup_type: String = "damage") -> void:
+	var popup = damage_popup_scene.instantiate()
+	damage_popup_container.add_child(popup)
+
+	var screen_position = camera.unproject_position(world_position + Vector3.UP * 1.5)
 
 	popup.position = Vector2(screen_position.x - 20, screen_position.y - 40)
 

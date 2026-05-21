@@ -7,7 +7,8 @@ enum PassiveType {
 	CONDITIONAL_BONUS,    # Bonus under condition (e.g. +1 dmg at close range)
 	ON_KILL,              # Trigger on kill (e.g. +1 AP)
 	AOE_ON_DAMAGE,        # AoE effect when dealing damage
-	RESISTANCE            # Damage resistance (e.g. -1 damage taken)
+	RESISTANCE,           # Damage resistance (e.g. -1 damage taken)
+	ON_ACTION             # Trigger on any action (attack or skill) — e.g. Volt Charge
 }
 
 @export var passive_type := PassiveType.FLAT_STAT_BONUS

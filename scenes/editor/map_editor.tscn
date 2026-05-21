@@ -1,0 +1,165 @@
+[gd_scene format=3 uid="uid://map_editor_scene"]
+
+[ext_resource type="Script" path="res://scripts/editor/map_editor.gd" id="1_editor"]
+[ext_resource type="PackedScene" uid="uid://cwl2q4wwq10yk" path="res://scenes/grid/HexTile3D.tscn" id="2_hex"]
+[ext_resource type="Resource" uid="uid://dkgsw7mfjoqcb" path="res://data/grid/default_grid_config.tres" id="3_cfg"]
+[ext_resource type="PackedScene" uid="uid://bxaf8sg4b8btq" path="res://scenes/units/unit_base.tscn" id="4_unit"]
+[ext_resource type="Script" uid="uid://cf64jr78ejp6m" path="res://scripts/grid/grid_manager.gd" id="5_grid"]
+[ext_resource type="Script" uid="uid://ci3hqhwh1fa21" path="res://scripts/core/camera_controller.gd" id="7_cam"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.08, 0.1, 0.14, 0.95)
+border_width_left = 2.0
+border_width_top = 2.0
+border_width_right = 2.0
+border_width_bottom = 2.0
+border_color = Color(0.25, 0.35, 0.5, 1.0)
+corner_radius_top_left = 10.0
+corner_radius_top_right = 10.0
+corner_radius_bottom_right = 10.0
+corner_radius_bottom_left = 10.0
+
+[node name="MapEditor" type="Node3D" script=ExtResource("1_editor")]
+grid_config = ExtResource("3_cfg")
+hex_tile_scene = ExtResource("2_hex")
+unit_scene = ExtResource("4_unit")
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="GridManager" type="Node3D" parent="World" script=ExtResource("5_grid")]
+config = ExtResource("3_cfg")
+hex_tile_scene = ExtResource("2_hex")
+
+[node name="Units" type="Node3D" parent="World"]
+
+[node name="CursorVisual" type="MeshInstance3D" parent="World"]
+
+[node name="CameraRig" type="Node3D" parent="World" script=ExtResource("7_cam")]
+
+[node name="CameraPitch" type="Node3D" parent="World/CameraRig"]
+
+[node name="Camera3D" type="Camera3D" parent="World/CameraRig/CameraPitch"]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 10, 20)
+projection = 1
+current = true
+fov = 35.0
+size = 14.0
+near = 0.5
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, -0.43301272, 0.25, 0, 0.5, 0.8660254, -0.5, -0.75, 0.4330127, 0, 10, 0)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="EditorPanel" type="PanelContainer" parent="UI"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -380.0
+offset_right = 280.0
+offset_bottom = -12.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="UI/EditorPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8.0
+
+[node name="TitleLabel" type="Label" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
+theme_override_font_sizes/font_size = 13
+text = "MAP EDITOR"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+
+[node name="TemplateLabel" type="Label" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "Templates:"
+
+[node name="TemplateList" type="ItemList" parent="UI/EditorPanel/VBox"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="TeamRow" type="HBoxContainer" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8.0
+
+[node name="TeamLabel" type="Label" parent="UI/EditorPanel/VBox/TeamRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "Team:"
+
+[node name="TeamOption" type="OptionButton" parent="UI/EditorPanel/VBox/TeamRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RadiusRow" type="HBoxContainer" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8.0
+
+[node name="RadiusLabel" type="Label" parent="UI/EditorPanel/VBox/RadiusRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "Grid Radius:"
+
+[node name="RadiusSpin" type="SpinBox" parent="UI/EditorPanel/VBox/RadiusRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator2" type="HSeparator" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+
+[node name="ButtonRow" type="HBoxContainer" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6.0
+
+[node name="BtnSave" type="Button" parent="UI/EditorPanel/VBox/ButtonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save"
+
+[node name="BtnLoad" type="Button" parent="UI/EditorPanel/VBox/ButtonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Load"
+
+[node name="ButtonRow2" type="HBoxContainer" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6.0
+
+[node name="BtnTest" type="Button" parent="UI/EditorPanel/VBox/ButtonRow2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Test"
+
+[node name="BtnClear" type="Button" parent="UI/EditorPanel/VBox/ButtonRow2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Clear"
+
+[node name="HSeparator3" type="HSeparator" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+
+[node name="HelpLabel" type="Label" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.55, 0.65, 1)
+theme_override_font_sizes/font_size = 10
+text = "Left Click: Place | Right Click: Remove"
+autowrap_mode = 2
+
+[node name="StatusLabel" type="Label" parent="UI/EditorPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 0.5, 1)
+theme_override_font_sizes/font_size = 10
+text = "Ready"
+autowrap_mode = 2

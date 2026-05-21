@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/combat_stim_buff.tres" id="2_buff"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "combat_stim"
+skill_name = "Combat Stim"
+description = "Inject combat stimulants. Self-buff: +2 attack power for 1 turn."
+ap_cost = 1
+skill_range = 0
+target_mode = 0
+team_filter = 3
+effects = [ExtResource("2_buff")]

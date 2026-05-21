@@ -9,4 +9,5 @@ weapon_name = "Vibro Blade"
 weapon_description = "Devastating melee attacks."
 weapon_type = "melee"
 tags = Array[String](["blade", "melee"])
-weapon_power = 6
+weapon_power = 5
+attack_ap_cost = 1

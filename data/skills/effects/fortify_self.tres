@@ -1,9 +1,13 @@
 [gd_resource type="Resource" script_class="SkillEffect" format=3]
 
 [ext_resource type="Script" path="res://scripts/skills/skill_effect.gd" id="1_e"]
-[ext_resource type="Resource" path="res://data/status_effects/fortify.tres" id="2_s"]
+[ext_resource type="Resource" path="res://data/status_effects/fortify_buff.tres" id="2_s"]
+[ext_resource type="Resource" path="res://data/status_effects/energize.tres" id="3_s"]
 
 [resource]
 script = ExtResource("1_e")
 effect_type = 2
 status_effect = ExtResource("2_s")
+# Heal effect placeholder
+# effect_type = 1
+# amount = 0

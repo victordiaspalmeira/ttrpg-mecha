@@ -6,6 +6,6 @@
 script = ExtResource("1_p")
 passive_type = 0
 display_name = "Thick Skin"
-description = "+1 defense"
+description = "Grants +1 Defense."
 stat_name = "defense"
 stat_value = 1

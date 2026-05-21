@@ -1,0 +1,5 @@
+- [ ] Rebalance weapon stats
+- [ ] Rebalance class stats
+- [ ] Create 6 new class resource files
+- [ ] Create 6 new unit template files
+- [ ] Verify integration and test balance

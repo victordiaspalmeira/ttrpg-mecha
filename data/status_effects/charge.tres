@@ -1,0 +1,11 @@
+[gd_resource type="StatusEffect" format=3]
+[ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+[resource]
+script = ExtResource("1_s")
+effect_id = "charge"
+display_name = "Charge"
+description = "Stackable buff that increases next attack damage by number of stacks. Consumed on attack."
+duration = -1
+modifiers = {
+    "damage_multiplier": 0
+}

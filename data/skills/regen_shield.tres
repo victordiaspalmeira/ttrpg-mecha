@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/regen_shield_apply.tres" id="2_regen"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "regen_shield"
+skill_name = "Regen Shield"
+description = "Apply Regen to an ally. Heals 1 HP at the start of their next turn."
+ap_cost = 1
+skill_range = 3
+target_mode = 1
+team_filter = 0
+effects = [ExtResource("2_regen")]

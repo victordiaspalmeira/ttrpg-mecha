@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="StatusEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/status_effect.gd" id="1_s"]
+[ext_resource type="Texture2D" path="res://assets/icons/buffs/haste.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_s")
+effect_id = "adrenaline_rush_haste"
+display_name = "Adrenaline Rush Haste"
+description = "Increases movement by 2 from Adrenaline Rush."
+duration = 2
+icon = ExtResource("2_icon")
+modifiers = {
+"movement": 2
+}

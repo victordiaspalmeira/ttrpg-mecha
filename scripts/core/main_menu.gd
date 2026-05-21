@@ -3,11 +3,13 @@ extends Control
 @onready var encounter_list: VBoxContainer = %EncounterList
 @onready var title_label: Label = %TitleLabel
 @onready var quit_button: Button = %QuitButton
+@onready var editor_button: Button = %EditorButton
 
 
 func _ready() -> void:
 	_populate_encounter_list()
 	quit_button.pressed.connect(_on_quit_pressed)
+	editor_button.pressed.connect(_on_editor_pressed)
 	
 	# Efeito de fade in
 	modulate.a = 0.0
@@ -72,6 +74,13 @@ func _on_encounter_selected(encounter: Resource) -> void:
 
 func _on_button_hovered() -> void:
 	pass
+
+func _on_editor_pressed() -> void:
+	var tween = create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.3)
+	await tween.finished
+	get_tree().change_scene_to_file("res://scenes/editor/map_editor.tscn")
+
 
 func _on_quit_pressed() -> void:
 	var tween = create_tween()

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" format=3]
+
+[ext_resource type="Script" path="res://scripts/skills/skill_data.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/skills/effects/accusation_apply.tres" id="2_accuse"]
+
+[resource]
+script = ExtResource("1_s")
+skill_id = "accusation"
+skill_name = "Accusation"
+description = "Mark a target as Accused permanently."
+ap_cost = 1
+skill_range = 3
+target_mode = 1
+team_filter = 1
+effects = [ExtResource("2_accuse")]

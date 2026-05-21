@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PassiveEffect" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/passive_effect.gd" id="1_p"]
+
+[resource]
+script = ExtResource("1_p")
+passive_type = 5
+display_name = "Volt Charge"
+description = "On action: gain +1 Charge stack. Each stack adds +1 damage to next attack."
+stat_name = "damage_multiplier"
+stat_value = 1
