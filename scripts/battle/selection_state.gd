@@ -9,8 +9,7 @@ signal pinned_unit_changed(unit: UnitBase)
 enum ActionMode {
 	NONE,
 	MOVE,
-	ATTACK,
-	SKILL,
+	ACTION,
 }
 
 var hovered_tile: HexTile = null

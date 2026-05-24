@@ -32,10 +32,6 @@ func spawn_unit(
 	unit.class_data = class_data
 	unit.team_id = team_id
 
-	if primary_weapon:
-		unit.primary_weapon = primary_weapon
-	if secondary_weapon:
-		unit.secondary_weapon = secondary_weapon
 	if portrait:
 		unit.portrait = portrait
 
@@ -49,7 +45,15 @@ func spawn_unit(
 	if team_data:
 		unit.apply_team_data(team_data)
 
+	# apply_class_data() sets weapons from class_data — call it first so base weapons are set
 	unit.apply_class_data()
+
+	# Override with custom weapons if provided (must happen AFTER apply_class_data
+	# because the equipment setter only works when unit.equipment is ready)
+	if primary_weapon:
+		unit.equipment.primary_weapon = primary_weapon
+	if secondary_weapon:
+		unit.equipment.secondary_weapon = secondary_weapon
 
 	unit.move_to_tile(tile)
 

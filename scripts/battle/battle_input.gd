@@ -132,55 +132,87 @@ func _handle_click() -> bool:
 				return false
 			return battle_flow.try_move_to_hovered_tile()
 
-		SelectionState.ActionMode.ATTACK:
-			var target: UnitBase = _resolve_attack_target(pick, current_unit)
-			if target == null:
-				print("ATTACK: no target found, pick=%s" % str(pick))
-				return false
-			print("ATTACK: targeting %s" % target.unit_name)
-			return battle_flow.try_attack_unit(target)
-
-		SelectionState.ActionMode.SKILL:
-			# Get the pending skill from BattleHud to check targeting mode
+		SelectionState.ActionMode.ACTION:
+			# Get the pending action from BattleHud
 			var battle_hud: BattleHud = current_unit.get_tree().current_scene.get_node_or_null("BattleSession/BattleHud")
-			if not battle_hud or not battle_hud._pending_skill:
+			if not battle_hud or not battle_hud._pending_action:
 				return false
-			var skill: SkillData = battle_hud._pending_skill
-			var target_unit: UnitBase = _resolve_attack_target(pick, current_unit)
-			var target_tile: HexTile = selection_state.hovered_tile
-			# For AOE skills centered on caster, use caster's tile
-			if skill.target_mode == SkillData.TargetMode.AOE_CIRCLE and skill.skill_range <= 0:
-				target_tile = current_unit.current_tile
-			# For SELF skills, no target needed
-			elif skill.target_mode == SkillData.TargetMode.SELF:
-				pass
-			elif not target_unit and not target_tile:
-				print("SKILL: no target found, pick=%s" % str(pick))
-				return false
-			print("SKILL: targeting unit=%s tile=%s mode=%d" % [target_unit, target_tile, skill.target_mode])
-			battle_hud._execute_skill_on_target(target_unit, target_tile)
-			selection_state.set_action_mode(SelectionState.ActionMode.NONE)
-			return true
+			var action: SkillData = battle_hud._pending_action
+
+			# Resolve target based on action's target mode
+			match action.target_mode:
+				SkillData.TargetMode.SELF:
+					battle_hud._execute_action_on_target(current_unit, current_unit.current_tile)
+					selection_state.set_action_mode(SelectionState.ActionMode.NONE)
+					return true
+
+				SkillData.TargetMode.SINGLE_UNIT:
+					var target: UnitBase = _resolve_target(pick, current_unit, action)
+					if target == null:
+						print("ACTION: no target found for %s, pick=%s" % [action.skill_name, str(pick)])
+						return false
+					print("ACTION: targeting %s with %s" % [target.unit_name, action.skill_name])
+					battle_hud._execute_action_on_target(target, null)
+					selection_state.set_action_mode(SelectionState.ActionMode.NONE)
+					return true
+
+				SkillData.TargetMode.SINGLE_TILE:
+					var target_tile: HexTile = selection_state.hovered_tile
+					if not target_tile:
+						return false
+					battle_hud._execute_action_on_target(null, target_tile)
+					selection_state.set_action_mode(SelectionState.ActionMode.NONE)
+					return true
+
+				SkillData.TargetMode.AOE_CIRCLE:
+					# For AOE at range, target a tile
+					if action.skill_range > 0:
+						var target_tile: HexTile = selection_state.hovered_tile
+						if not target_tile:
+							return false
+						battle_hud._execute_action_on_target(null, target_tile)
+					else:
+						# AOE centered on caster
+						battle_hud._execute_action_on_target(current_unit, current_unit.current_tile)
+					selection_state.set_action_mode(SelectionState.ActionMode.NONE)
+					return true
 
 	return false
 
 
-func _resolve_attack_target(pick: Variant, current_unit: UnitBase) -> UnitBase:
+## Unified target resolver: picks the best target based on action's team filter.
+func _resolve_target(pick: Variant, current_unit: UnitBase, action: SkillData) -> UnitBase:
+	# Prefer hovered unit if it matches the team filter
 	if selection_state.hovered_unit and selection_state.hovered_unit != current_unit:
-		return selection_state.hovered_unit
+		if _matches_team_filter(selection_state.hovered_unit, current_unit, action):
+			return selection_state.hovered_unit
 
 	if pick == null:
 		return null
 
 	if pick.type == "unit" and pick.unit != current_unit:
-		return pick.unit as UnitBase
+		if _matches_team_filter(pick.unit, current_unit, action):
+			return pick.unit as UnitBase
 
 	if pick.type == "tile" and pick.tile.occupying_unit:
 		var occupant: UnitBase = pick.tile.occupying_unit
-		if occupant != current_unit:
+		if occupant != current_unit and _matches_team_filter(occupant, current_unit, action):
 			return occupant
 
 	return null
+
+
+func _matches_team_filter(target: UnitBase, caster: UnitBase, action: SkillData) -> bool:
+	match action.team_filter:
+		SkillData.TeamFilter.ENEMY:
+			return not caster.is_same_team(target)
+		SkillData.TeamFilter.ALLY:
+			return caster.is_same_team(target)
+		SkillData.TeamFilter.BOTH:
+			return true
+		SkillData.TeamFilter.SELF_ONLY:
+			return target == caster
+	return false
 
 
 func _on_move_button_pressed() -> void:
@@ -203,9 +235,6 @@ func _can_use_action_mode(mode: SelectionState.ActionMode) -> bool:
 
 	if mode == SelectionState.ActionMode.MOVE:
 		return unit.current_movement > 0
-
-	if mode == SelectionState.ActionMode.ATTACK:
-		return unit.can_spend_ap(unit.get_attack_ap_cost())
 
 	return true
 

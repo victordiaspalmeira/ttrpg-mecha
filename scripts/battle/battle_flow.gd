@@ -238,39 +238,6 @@ func execute_move(unit: UnitBase, target_tile: HexTile) -> bool:
 	return true
 
 
-func try_attack_unit(target_unit: UnitBase) -> bool:
-	if _battle_over:
-		return false
-
-	var attacker: UnitBase = selection_state.selected_unit
-
-	if not attacker or attacker != turn_controller.current_unit:
-		return false
-
-	if not is_instance_valid(target_unit):
-		battle_hud.show_action_feedback("No valid target.")
-		return false
-
-	if target_unit.is_same_team(attacker):
-		battle_hud.show_action_feedback("Cannot attack allies.")
-		return false
-
-	if not combat_resolver.is_unit_in_attack_range(attacker, target_unit):
-		battle_hud.show_action_feedback("Target is out of range.")
-		return false
-
-	if not attacker.can_spend_ap(attacker.get_attack_ap_cost()):
-		battle_hud.show_action_feedback("Not enough AP to attack.")
-		return false
-
-	var attacked: bool = execute_attack(attacker, target_unit)
-	if attacked:
-		selection_state.set_action_mode(SelectionState.ActionMode.NONE)
-
-	_refresh_action_highlights()
-	return attacked
-
-
 func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 	var damage: int = attacker.get_total_attack_power()
 
