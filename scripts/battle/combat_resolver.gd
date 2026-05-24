@@ -5,15 +5,17 @@ signal attack_executed(attacker: UnitBase, target: UnitBase)
 signal target_hit(target: UnitBase, damage: int)
 
 
-func is_unit_in_attack_range(attacker: UnitBase, target: UnitBase) -> bool:
+func is_unit_in_range(attacker: UnitBase, target: UnitBase, range_val: int) -> bool:
 	if not attacker.current_tile or not target.current_tile:
 		return false
-
 	var distance: int = HexMath.axial_distance_tiles(
 		attacker.current_tile,
 		target.current_tile
 	)
-	return distance <= attacker.get_effective_range()
+	return distance <= range_val
+
+func is_unit_in_attack_range(attacker: UnitBase, target: UnitBase) -> bool:
+	return is_unit_in_range(attacker, target, attacker.get_effective_range())
 
 
 func can_attack(attacker: UnitBase, target: UnitBase) -> bool:

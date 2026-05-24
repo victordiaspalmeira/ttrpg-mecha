@@ -11,6 +11,7 @@
 script = ExtResource("1_c")
 class_id = "judge"
 display_name = "Judge"
+sprite_variant = "red"
 max_hp = 5
 movement = 6
 max_ap = 5

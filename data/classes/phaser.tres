@@ -12,6 +12,7 @@
 script = ExtResource("1_c")
 class_id = "phaser"
 display_name = "Phaser"
+sprite_variant = "cyan"
 max_hp = 8
 movement = 6   # base 4 +2 movement
 max_ap = 5

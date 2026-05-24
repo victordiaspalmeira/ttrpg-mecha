@@ -1,12 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/units/unit_base.gd" id="1_unit"]
-[ext_resource type="Script" path="res://scripts/units/unit_sprite_visual.gd" id="2_visual"]
-
-[sub_resource type="QuadMesh" id="QuadMesh_sprite"]
-size = Vector2(1, 1)
-flip_faces = false
-orientation = 1
+[ext_resource type="Script" path="res://scripts/units/unit_sprite_controller.gd" id="2_visual"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_body"]
 size = Vector3(0.9, 1.76, 0.9)
@@ -20,11 +15,6 @@ default_animation = "idle"
 pixel_size = 0.022
 y_offset = 0.0
 use_placeholder_sheets = true
-
-[node name="SpriteAnchor" type="Node3D" parent="UnitVisual"]
-
-[node name="QuadSprite" type="MeshInstance3D" parent="UnitVisual/SpriteAnchor"]
-mesh = SubResource("QuadMesh_sprite")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.01, 0)

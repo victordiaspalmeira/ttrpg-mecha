@@ -5,6 +5,9 @@ extends Resource
 @export var display_name := ""
 @export var portrait: Texture2D
 
+## Which sprite variant to use: "grey", "cyan", "yellow", "orange", "red"
+@export var sprite_variant := "grey"
+
 @export var max_hp := 5
 @export var movement := 6
 @export var max_ap := 4

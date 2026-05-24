@@ -7,6 +7,7 @@
 script = ExtResource("1_class")
 class_id = "ember"
 display_name = "Ember"
+sprite_variant = "red"
 max_hp = 8
 movement = 3
 max_ap = 3

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+[ext_resource type="Script" path="res://scripts/data/class_data.gd" id="1_c"]
+[ext_resource type="Resource" path="res://data/weapons/starter_rifle.tres" id="2_pri"]
+[ext_resource type="Resource" path="res://data/weapons/shotgun.tres" id="3_sec"]
+
+[resource]
+script = ExtResource("1_c")
+class_id = "heavy"
+display_name = "Heavy"
+sprite_variant = "grey"
+max_hp = 14
+movement = 3
+max_ap = 4
+defense = 3
+base_attack = 3
+primary_weapon = ExtResource("2_pri")
+secondary_weapon = ExtResource("3_sec")

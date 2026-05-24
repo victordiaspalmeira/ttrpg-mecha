@@ -22,6 +22,10 @@ var stats: UnitStats
 var effects: UnitEffects
 var equipment: UnitEquipment
 
+# Pending weapon overrides set before _ready()
+var _pending_primary: WeaponData = null
+var _pending_secondary: WeaponData = null
+
 # Passive bonuses from class
 var _passive_bonuses: Dictionary = {}
 
@@ -31,7 +35,7 @@ var current_tile: HexTile = null
 # Runtime
 var skill_cooldowns := {}
 
-@onready var _unit_visual: UnitSpriteVisual = $UnitVisual
+@onready var _unit_visual = $UnitVisual
 
 # Injected services (set via setup())
 var audio_manager: AudioManager = null
@@ -167,16 +171,20 @@ func get_effect_modifier(stat: String) -> int:
 # ------------------------------------------------------------------------------
 
 @export var primary_weapon: WeaponData:
-	get: return equipment.primary_weapon if equipment else null
+	get: return equipment.primary_weapon if equipment else _pending_primary
 	set(v):
 		if equipment:
 			equipment.primary_weapon = v
+		else:
+			_pending_primary = v
 
 @export var secondary_weapon: WeaponData:
-	get: return equipment.secondary_weapon if equipment else null
+	get: return equipment.secondary_weapon if equipment else _pending_secondary
 	set(v):
 		if equipment:
 			equipment.secondary_weapon = v
+		else:
+			_pending_secondary = v
 
 var active_weapon_slot: String:
 	get: return equipment.active_weapon_slot if equipment else "primary"
@@ -191,6 +199,34 @@ func switch_weapon() -> void:
 
 func get_attack_ap_cost() -> int:
 	return equipment.get_attack_ap_cost() if equipment else 1
+
+
+# ------------------------------------------------------------------------------
+# Attack skill (unified with skills system)
+# ------------------------------------------------------------------------------
+
+## Builds a SkillData dynamically from the active weapon.
+## This allows basic attacks to use the same SkillExecutor as regular skills.
+func get_attack_skill() -> SkillData:
+	var weapon := get_active_weapon()
+	if not weapon:
+		return null
+
+	var skill := SkillData.new()
+	skill.skill_id = "attack_%s" % weapon.weapon_id
+	skill.skill_name = weapon.weapon_name
+	skill.skill_range = weapon.weapon_range
+	skill.ap_cost = weapon.attack_ap_cost
+	skill.target_mode = SkillData.TargetMode.SINGLE_UNIT
+	skill.team_filter = SkillData.TeamFilter.ENEMY
+
+	# Create a DAMAGE effect that uses the unit's total attack power
+	var dmg_effect := SkillEffect.new()
+	dmg_effect.effect_type = SkillEffect.EffectType.DAMAGE
+	dmg_effect.amount = get_total_attack_power()
+	skill.effects = [dmg_effect]
+
+	return skill
 
 
 # ------------------------------------------------------------------------------
@@ -273,7 +309,7 @@ func reduce_cooldowns() -> void:
 func die() -> void:
 	died.emit()
 	if _unit_visual:
-		var tween := _unit_visual.play_death()
+		var tween: Tween = _unit_visual.play_death()
 		if audio_manager:
 			audio_manager.play_death()
 		if battle_hud:
@@ -295,7 +331,7 @@ func move_to_tile(tile: HexTile) -> void:
 		current_tile.occupying_unit = null
 	current_tile = tile
 	current_tile.occupying_unit = self
-	var tween = create_tween()
+	var tween: Tween = create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(self, "global_position", tile.global_position, movement_tween_duration)
@@ -310,10 +346,11 @@ func get_portrait() -> Texture2D:
 		return portrait
 	if class_data and class_data.portrait:
 		return class_data.portrait
-	if _unit_visual and _unit_visual.sprite_frames:
-		var frames := _unit_visual.sprite_frames
-		if frames.has_animation("idle") and frames.get_frame_count("idle") > 0:
-			return frames.get_frame_texture("idle", 0)
+	if _unit_visual and _unit_visual.animations.has("idle"):
+		var anim: Dictionary = _unit_visual.animations["idle"]
+		var tex: Texture2D = anim.get("texture") as Texture2D
+		if tex:
+			return tex
 	return null
 
 func get_visual_top_y() -> float:
@@ -352,9 +389,9 @@ func is_same_team(other: UnitBase) -> bool:
 func apply_class_data() -> void:
 	if not class_data:
 		_apply_combat_stats()
-		_apply_team_visual()
 		return
 
+	# --- Stats & Equipment (critical for combat) ---
 	stats.setup(
 		class_data.max_hp,
 		class_data.movement,
@@ -365,9 +402,24 @@ func apply_class_data() -> void:
 
 	equipment.setup(class_data.primary_weapon, class_data.secondary_weapon)
 
+	# Apply any weapon overrides that were set before equipment existed
+	if _pending_primary:
+		equipment.primary_weapon = _pending_primary
+		_pending_primary = null
+	if _pending_secondary:
+		equipment.secondary_weapon = _pending_secondary
+		_pending_secondary = null
+
 	_apply_combat_stats()
 	_apply_passives()
+
+	# --- Visual (isolated — errors here must NOT break combat) ---
 	_apply_team_visual()
+
+	# Configure sprite variant deferred so visual loading can't break _ready()
+	if _unit_visual and class_data:
+		var variant := class_data.sprite_variant
+		_unit_visual.call_deferred("configure_variant", variant)
 
 func _apply_passives() -> void:
 	if not class_data:

@@ -12,6 +12,7 @@
 script = ExtResource("1_c")
 class_id = "assault"
 display_name = "Assault"
+sprite_variant = "grey"
 max_hp = 8
 movement = 4
 max_ap = 5

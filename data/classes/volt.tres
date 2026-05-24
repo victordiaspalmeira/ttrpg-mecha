@@ -11,6 +11,7 @@
 script = ExtResource("1_c")
 class_id = "volt"
 display_name = "Volt"
+sprite_variant = "yellow"
 max_hp = 8
 movement = 5
 max_ap = 5
