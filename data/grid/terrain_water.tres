@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TerrainType" format=3 uid="uid://terrain_water"]
+
+[ext_resource type="Script" uid="uid://terrain_type" path="res://scripts/data/terrain_type.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+terrain_id = "water"
+display_name = "Water"
+move_cost = 3
+is_blocking = false
+is_walkable = false
+blocks_los = false
+tile_color = Color(0.15, 0.35, 0.6, 1.0)
+height_offset = -0.05
+tags = ["water", "unwalkable"]

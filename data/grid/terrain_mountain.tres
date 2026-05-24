@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TerrainType" format=3 uid="uid://terrain_mountain"]
+
+[ext_resource type="Script" uid="uid://terrain_type" path="res://scripts/data/terrain_type.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+terrain_id = "mountain"
+display_name = "Mountain"
+move_cost = 1
+is_blocking = true
+is_walkable = false
+blocks_los = true
+tile_color = Color(0.35, 0.3, 0.25, 1.0)
+height_offset = 0.15
+tags = ["mountain", "blocking", "unwalkable", "blocks_los"]

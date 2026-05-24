@@ -3,24 +3,24 @@ extends Node
 
 @export var sfx_volume := -8.0
 
-@onready var sfx_attack: AudioStreamPlayer = %AudioAttack
-@onready var sfx_move: AudioStreamPlayer = %AudioMove
-@onready var sfx_hit: AudioStreamPlayer = %AudioHit
-@onready var sfx_death: AudioStreamPlayer = %AudioDeath
-@onready var sfx_end_turn: AudioStreamPlayer = %AudioEndTurn
-@onready var sfx_ui_hover: AudioStreamPlayer = %AudioUIHover
-@onready var sfx_ui_click: AudioStreamPlayer = %AudioUIClick
-@onready var sfx_turn_start: AudioStreamPlayer = %AudioTurnStart
+@onready var sfx_attack: AudioStreamPlayer = %AudioManager/AudioAttack
+@onready var sfx_move: AudioStreamPlayer = %AudioManager/AudioMove
+@onready var sfx_hit: AudioStreamPlayer = %AudioManager/AudioHit
+@onready var sfx_death: AudioStreamPlayer = %AudioManager/AudioDeath
+@onready var sfx_end_turn: AudioStreamPlayer = %AudioManager/AudioEndTurn
+@onready var sfx_ui_hover: AudioStreamPlayer = %AudioManager/AudioUIHover
+@onready var sfx_ui_click: AudioStreamPlayer = %AudioManager/AudioUIClick
+@onready var sfx_turn_start: AudioStreamPlayer = %AudioManager/AudioTurnStart
 
 # Skill SFX players
-@onready var sfx_skill_buff: AudioStreamPlayer = %AudioSkillBuff
-@onready var sfx_skill_debuff: AudioStreamPlayer = %AudioSkillDebuff
-@onready var sfx_skill_heal: AudioStreamPlayer = %AudioSkillHeal
-@onready var sfx_skill_damage: AudioStreamPlayer = %AudioSkillDamage
-@onready var sfx_skill_turret: AudioStreamPlayer = %AudioSkillTurret
-@onready var sfx_skill_taunt: AudioStreamPlayer = %AudioSkillTaunt
-@onready var sfx_skill_grenade: AudioStreamPlayer = %AudioSkillGrenade
-@onready var sfx_invalid: AudioStreamPlayer = %AudioInvalid
+@onready var sfx_skill_buff: AudioStreamPlayer = %AudioManager/AudioSkillBuff
+@onready var sfx_skill_debuff: AudioStreamPlayer = %AudioManager/AudioSkillDebuff
+@onready var sfx_skill_heal: AudioStreamPlayer = %AudioManager/AudioSkillHeal
+@onready var sfx_skill_damage: AudioStreamPlayer = %AudioManager/AudioSkillDamage
+@onready var sfx_skill_turret: AudioStreamPlayer = %AudioManager/AudioSkillTurret
+@onready var sfx_skill_taunt: AudioStreamPlayer = %AudioManager/AudioSkillTaunt
+@onready var sfx_skill_grenade: AudioStreamPlayer = %AudioManager/AudioSkillGrenade
+@onready var sfx_invalid: AudioStreamPlayer = %AudioManager/AudioInvalid
 
 var _combat_resolver: CombatResolver = null
 var _turn_controller: TurnController = null

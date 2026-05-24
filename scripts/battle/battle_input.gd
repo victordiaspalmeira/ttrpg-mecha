@@ -32,8 +32,10 @@ func setup(
 	var camera_rig: Node3D = world.get_node("CameraRig") as Node3D
 	camera = camera_rig.get_node("CameraPitch/Camera3D") as Camera3D
 
-	move_button = %MoveButton
-	end_turn_button = %EndTurnButton
+	# Find UI buttons via absolute path (stable scene structure)
+	var ui_layer := get_node("/root/BattleScene/UI/CanvasLayer") as CanvasLayer
+	end_turn_button = ui_layer.get_node("ActionPanel/VBoxContainer/EndTurnButton")
+	move_button = ui_layer.get_node("ActionPanel/VBoxContainer/MoveButton")
 
 	move_button.pressed.connect(_on_move_button_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_button_pressed)
@@ -107,10 +109,22 @@ func _handle_click() -> bool:
 	match selection_state.current_action_mode:
 		SelectionState.ActionMode.NONE:
 			if pick == null:
+				# Clicked on empty space — unpin info panel
+				selection_state.unpin_unit()
 				return false
 			if pick.type == "unit" and pick.unit == current_unit:
 				battle_flow.try_select_current_unit(pick.unit)
+				# Pin the unit to show persistent info panel
+				selection_state.pin_unit(pick.unit)
 				return true
+			# Clicking on another unit pins it (for inspection)
+			if pick.type == "unit":
+				selection_state.pin_unit(pick.unit)
+				return true
+			# Clicking on an empty tile — unpin info panel
+			if pick.type == "tile" and pick.tile.occupying_unit == null:
+				selection_state.unpin_unit()
+				return false
 			return false
 
 		SelectionState.ActionMode.MOVE:

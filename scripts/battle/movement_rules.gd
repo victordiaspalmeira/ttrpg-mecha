@@ -9,7 +9,17 @@ static func get_move_cost(unit: UnitBase, target_tile: HexTile, grid_manager: Gr
 	if target_tile == unit.current_tile:
 		return 0
 
-	return grid_manager.get_distance(unit.current_tile, target_tile)
+	# Use A* path to calculate true cost with variable terrain costs
+	var path: Array[HexTile] = grid_manager.find_path_astar(unit.current_tile, target_tile)
+	if path.is_empty():
+		return 999  # Unreachable
+
+	# Sum the costs (don't count starting tile)
+	var total_cost := 0
+	for i in range(1, path.size()):
+		total_cost += path[i].get_move_cost()
+
+	return total_cost
 
 
 static func get_reachable_tiles(unit: UnitBase, grid_manager: GridManager) -> Array[HexTile]:
@@ -79,46 +89,6 @@ static func find_path(unit: UnitBase, target_tile: HexTile, grid_manager: GridMa
 	if not can_move_to(unit, target_tile, grid_manager):
 		return []
 
-	var start_tile: HexTile = unit.current_tile
-	var came_from: Dictionary = {start_tile: null}
-	var frontier: Array[HexTile] = [start_tile]
+	# Use A* pathfinder with movement budget as max_cost
 	var move_budget: int = unit.current_movement
-	var distance_from_start: Dictionary = {start_tile: 0}
-
-	while not frontier.is_empty():
-		var current: HexTile = frontier.pop_front()
-		var current_distance: int = int(distance_from_start[current])
-
-		if current == target_tile:
-			return _reconstruct_path(came_from, target_tile)
-
-		if current_distance >= move_budget:
-			continue
-
-		for neighbor in grid_manager.get_neighbors(current):
-			var neighbor_tile: HexTile = neighbor as HexTile
-			if neighbor_tile == null:
-				continue
-
-			if neighbor_tile.occupying_unit and neighbor_tile != start_tile:
-				continue
-
-			if distance_from_start.has(neighbor_tile):
-				continue
-
-			distance_from_start[neighbor_tile] = current_distance + 1
-			came_from[neighbor_tile] = current
-			frontier.append(neighbor_tile)
-
-	return []
-
-
-static func _reconstruct_path(came_from: Dictionary, goal: HexTile) -> Array[HexTile]:
-	var path: Array[HexTile] = [goal]
-	var current: HexTile = goal
-
-	while came_from.has(current) and came_from[current] != null:
-		current = came_from[current] as HexTile
-		path.push_front(current)
-
-	return path
+	return grid_manager.find_path_astar(unit.current_tile, target_tile, move_budget)

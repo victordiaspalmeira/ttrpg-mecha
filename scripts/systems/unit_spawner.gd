@@ -5,6 +5,17 @@ extends Node
 
 @onready var units_container: Node3D = %Units
 
+# Injected services (set via setup())
+var audio_manager: AudioManager = null
+var battle_hud: BattleHud = null
+var selection_state: SelectionState = null
+
+
+func setup(p_audio: AudioManager, p_hud: BattleHud, p_selection: SelectionState) -> void:
+	audio_manager = p_audio
+	battle_hud = p_hud
+	selection_state = p_selection
+
 
 func spawn_unit(
 	class_data: ClassData,
@@ -30,6 +41,9 @@ func spawn_unit(
 
 	# Add to tree — this triggers _ready() which calls apply_team_data
 	units_container.add_child(unit)
+
+	# Inject dependencies into the unit
+	unit.setup(audio_manager, battle_hud, selection_state)
 
 	# Apply team data (colors, etc.) after _ready()
 	if team_data:

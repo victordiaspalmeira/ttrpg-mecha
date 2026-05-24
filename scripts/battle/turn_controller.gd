@@ -4,7 +4,7 @@ extends Node
 signal current_unit_changed(unit: UnitBase)
 signal turn_ended(unit: UnitBase)
 
-@onready var units_container: Node3D = %Units
+@onready var units_container: Node3D = %World/Units
 
 var turn_queue: Array[UnitBase] = []
 var current_turn_index: int = 0

@@ -1,7 +1,27 @@
 class_name SkillExecutor
 extends Node
 
+# Injected services (set via setup())
+var particle_manager: ParticleManager = null
+var battle_hud: BattleHud = null
+var audio_manager: AudioManager = null
+var grid_manager: GridManager = null
+var passive_service: PassiveService = null
 var cinematic_player: CinematicPlayer = null
+
+
+func setup(
+	p_particle: ParticleManager,
+	p_hud: BattleHud,
+	p_audio: AudioManager,
+	p_grid: GridManager,
+	p_passive_service: PassiveService = null
+) -> void:
+	particle_manager = p_particle
+	battle_hud = p_hud
+	audio_manager = p_audio
+	grid_manager = p_grid
+	passive_service = p_passive_service
 
 
 func _ready() -> void:
@@ -40,28 +60,28 @@ func execute(ctx: SkillContext) -> bool:
 		ctx.caster.add_effect(status, ctx.caster.unit_name)
 
 	# Trigger AFTER_SKILL event (Volt Charge: +1 Charge stack on any action)
-	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.AFTER_SKILL, ctx.caster, {"skill": ctx.skill})
+	if passive_service:
+		passive_service.trigger_event(passive_service.PassiveEvent.AFTER_SKILL, ctx.caster, {"skill": ctx.skill})
+	else:
+		PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.AFTER_SKILL, ctx.caster, {"skill": ctx.skill})
 
 	# Play skill cinematic + particles
 	if cinematic_player and not ctx.affected_units.is_empty():
 		var primary_effect := _determine_particle_effect(ctx, false)
 		cinematic_player.play_skill_cinematic(ctx.caster, ctx.affected_units, primary_effect, func():
 			# Show action name popup after cinematic
-			var battle_hud := _get_battle_hud(ctx.caster)
 			if battle_hud:
 				battle_hud.show_action_name_popup(ctx.skill.skill_name)
-		, _get_particle_manager(ctx.caster))
+		, particle_manager)
 	else:
 		# Fallback: just play particles
 		_play_skill_particles(ctx, false)
 
 	# Play skill SFX
-	var audio_manager := _get_audio_manager(ctx.caster)
 	if audio_manager:
 		audio_manager.play_skill_sfx(ctx.skill.skill_id)
 
 	# Show action name popup
-	var battle_hud := _get_battle_hud(ctx.caster)
 	if battle_hud:
 		battle_hud.show_action_name_popup(ctx.skill.skill_name)
 
@@ -70,7 +90,6 @@ func execute(ctx: SkillContext) -> bool:
 
 ## Play particle effects based on skill type and effects
 func _play_skill_particles(ctx: SkillContext, is_toggle_off: bool) -> void:
-	var particle_manager := _get_particle_manager(ctx.caster)
 	if not particle_manager:
 		return
 	
@@ -186,20 +205,6 @@ func _get_status_particle(status_id: String) -> int:
 			return -1
 
 
-## Get the particle manager from the scene
-func _get_particle_manager(unit: UnitBase) -> ParticleManager:
-	var scene_root: Node = unit.get_tree().current_scene
-	var session := scene_root.get_node_or_null("BattleSession")
-	if not session:
-		return null
-	return session.get_node_or_null("ParticleManager") as ParticleManager
-
-
-func _get_battle_hud(unit: UnitBase) -> BattleHud:
-	var scene_root: Node = unit.get_tree().current_scene
-	return scene_root.get_node_or_null("BattleSession/BattleHud") as BattleHud
-
-
 ## Returns true if this is a toggle skill (SELF target + has self-effects with duration -1).
 func _is_toggle_skill(ctx: SkillContext) -> bool:
 	if ctx.skill.target_mode != SkillData.TargetMode.SELF:
@@ -288,8 +293,10 @@ func _resolve_aoe(ctx: SkillContext) -> void:
 		center_tile = ctx.caster.current_tile
 	if not center_tile:
 		return
-	var grid: GridManager = ctx.caster.get_tree().current_scene.get_node("World/GridManager")
-	var tiles_in_range := grid.get_tiles_in_range(center_tile, ctx.skill.aoe_radius)
+	# Use injected grid_manager instead of searching in runtime
+	if not grid_manager:
+		return
+	var tiles_in_range := grid_manager.get_tiles_in_range(center_tile, ctx.skill.aoe_radius)
 	for tile: HexTile in tiles_in_range:
 		if tile.occupying_unit:
 			ctx.affected_units.append(tile.occupying_unit)
@@ -319,10 +326,3 @@ func _apply_stat_modifier(effect: SkillEffect, target: UnitBase) -> void:
 	status.duration = effect.duration
 	status.modifiers[effect.stat_name] = effect.stat_modifier
 	target.add_effect(status, target.unit_name)
-
-
-func _get_audio_manager(unit: UnitBase) -> AudioManager:
-	var scene_root: Node = unit.get_tree().current_scene
-	return scene_root.get_node_or_null("BattleSession/AudioManager") as AudioManager
-
-

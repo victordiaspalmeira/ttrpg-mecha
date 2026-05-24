@@ -9,6 +9,13 @@ var q: int
 var r: int
 var occupying_unit: UnitBase = null
 
+# Tile data
+var terrain: TerrainType = null
+var elevation: float = 0.0
+var obstacle_id: String = ""          # "rock", "tree", "wall", "" = none
+var custom_move_cost: int = 0          # 0 = use terrain's default
+var tags: Array[String] = []           # Runtime tags
+
 var _config: GridConfig
 var _default_material: Material
 var _hover_material: Material
@@ -23,6 +30,8 @@ var is_in_attack_range := false
 var is_in_attack_reach := false
 var is_hovered := false
 
+const DEFAULT_TERRAIN := preload("res://data/grid/default_grass_terrain.tres")
+
 
 func configure(grid_config: GridConfig) -> void:
 	_config = grid_config
@@ -34,6 +43,10 @@ func configure(grid_config: GridConfig) -> void:
 	_move_overlay_material = _config.move_overlay_material
 	_attack_overlay_material = _config.attack_overlay_material
 	_attack_reach_overlay_material = _config.attack_reach_overlay_material
+
+	# Ensure terrain (default grass if none set)
+	if not terrain:
+		terrain = DEFAULT_TERRAIN
 
 	_apply_mesh_dimensions()
 	update_visual()
@@ -55,7 +68,7 @@ func _apply_mesh_dimensions() -> void:
 	highlight_overlay.mesh = overlay_mesh
 
 	var surface_y := _config.get_surface_y()
-	highlight_overlay.position.y = surface_y + 0.02
+	highlight_overlay.position.y = surface_y + elevation + 0.02
 
 	var cylinder := _collision_shape.shape as CylinderShape3D
 	if cylinder:
@@ -63,15 +76,56 @@ func _apply_mesh_dimensions() -> void:
 		cylinder.height = _config.mesh_height
 
 
+# ------------------------------------------------------------------------------
+# Movement / blocking queries
+# ------------------------------------------------------------------------------
+
+## Returns the move cost to enter this tile.
+func get_move_cost() -> int:
+	if custom_move_cost > 0:
+		return custom_move_cost
+	if terrain:
+		return terrain.move_cost
+	return 1
+
+
+## Returns true if this tile blocks movement (terrain or occupied).
+func is_blocking_tile() -> bool:
+	if terrain and terrain.is_blocking:
+		return true
+	if occupying_unit != null:
+		return true
+	return false
+
+
+## Returns true if this tile blocks line of sight.
+func blocks_los() -> bool:
+	if terrain and terrain.blocks_los:
+		return true
+	if obstacle_id != "":
+		return true
+	return false
+
+
+## Returns the effective height of this tile.
+func get_effective_height() -> float:
+	var h := _config.get_surface_y() + elevation
+	if terrain:
+		h += terrain.height_offset
+	return h
+
+
+# ------------------------------------------------------------------------------
+# Visual state
+# ------------------------------------------------------------------------------
+
 func set_hovered() -> void:
 	is_hovered = true
 	update_visual()
 
-
 func clear_hover() -> void:
 	is_hovered = false
 	update_visual()
-
 
 func show_move_range() -> void:
 	if is_selected:
@@ -79,11 +133,9 @@ func show_move_range() -> void:
 	is_in_move_range = true
 	update_visual()
 
-
 func clear_move_range() -> void:
 	is_in_move_range = false
 	update_visual()
-
 
 func show_attack_range() -> void:
 	if is_selected:
@@ -92,11 +144,9 @@ func show_attack_range() -> void:
 	is_in_attack_reach = false
 	update_visual()
 
-
 func clear_attack_range() -> void:
 	is_in_attack_range = false
 	update_visual()
-
 
 func show_attack_reach() -> void:
 	if is_selected:
@@ -106,21 +156,17 @@ func show_attack_reach() -> void:
 	is_in_attack_reach = true
 	update_visual()
 
-
 func clear_attack_reach() -> void:
 	is_in_attack_reach = false
 	update_visual()
-
 
 func select() -> void:
 	is_selected = true
 	update_visual()
 
-
 func deselect() -> void:
 	is_selected = false
 	update_visual()
-
 
 func update_visual() -> void:
 	if not _config:

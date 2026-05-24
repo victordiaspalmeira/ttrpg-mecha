@@ -1,0 +1,376 @@
+[gd_scene format=3 uid="uid://unit_details_panel"]
+
+[ext_resource type="Script" path="res://scripts/ui/unit_details_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://b20y4fvs3w008" path="res://assets/icons/buffs/regeneration.png" id="2_hp"]
+[ext_resource type="Texture2D" uid="uid://c6grj7fxhfoqr" path="res://assets/icons/buffs/defense_boost.png" id="3_def"]
+[ext_resource type="Texture2D" uid="uid://cvdtf43hb8w4w" path="res://assets/icons/buffs/attack_boost.png" id="4_atk"]
+[ext_resource type="Texture2D" uid="uid://cpcak7gdbaxxt" path="res://assets/icons/buffs/haste.png" id="5_mov"]
+[ext_resource type="Texture2D" uid="uid://dfsx7mq8q4kss" path="res://assets/icons/spells/mana_replenish.png" id="6_ap"]
+[ext_resource type="Texture2D" uid="uid://c4qdq4xf1m6vp" path="res://assets/icons/spells/fire_spell.png" id="7_rng"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+bg_color = Color(0.09, 0.11, 0.15, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.45, 0.58, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_close"]
+bg_color = Color(0.2, 0.2, 0.3, 1.0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.5, 0.7, 1.0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_section"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.07, 0.08, 0.12, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.3, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="UnitDetailsPanel" type="PanelContainer"]
+unique_name_in_owner = true
+mouse_filter = 1
+script = ExtResource("1_script")
+
+[node name="Content" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="Content/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_vertical = 0
+size_flags_horizontal = 3
+
+[node name="HeaderHBox" type="HBoxContainer" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Portrait" type="TextureRect" parent="Content/ScrollContainer/VBox/HeaderHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+
+[node name="HeaderVBox" type="VBoxContainer" parent="Content/ScrollContainer/VBox/HeaderHBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+size_flags_horizontal = 3
+
+[node name="NameLabel" type="Label" parent="Content/ScrollContainer/VBox/HeaderHBox/HeaderVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="ClassLabel" type="Label" parent="Content/ScrollContainer/VBox/HeaderHBox/HeaderVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.65, 0.78, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="TeamIndicatorHBox" type="HBoxContainer" parent="Content/ScrollContainer/VBox/HeaderHBox/HeaderVBox"]
+layout_mode = 2
+
+[node name="TeamIndicator" type="TextureRect" parent="Content/ScrollContainer/VBox/HeaderHBox/HeaderVBox/TeamIndicatorHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+
+[node name="CloseButton" type="Button" parent="Content/ScrollContainer/VBox/HeaderHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "X"
+custom_minimum_size = Vector2(24, 24)
+theme_override_styles/normal = SubResource("StyleBoxFlat_close")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="Separator1" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="PassivesHeader" type="Label" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "PASSIVES"
+
+[node name="PassivesContainer" type="VBoxContainer" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Separator2" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="StatsHeader" type="Label" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "ATTRIBUTES"
+
+[node name="HPHeader" type="HBoxContainer" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="Content/ScrollContainer/VBox/HPHeader"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+texture = ExtResource("2_hp")
+texture_filter = 1
+
+[node name="HPLabel" type="Label" parent="Content/ScrollContainer/VBox/HPHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.88, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="HPBar" type="ProgressBar" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+size_flags_horizontal = 0
+show_percentage = false
+
+[node name="HPBreakdown" type="RichTextLabel" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/normal_font_size = 11
+scroll_active = false
+fit_content_height = true
+
+[node name="SepAfterHP" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="DEFHeader" type="HBoxContainer" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="Content/ScrollContainer/VBox/DEFHeader"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+texture = ExtResource("3_def")
+texture_filter = 1
+
+[node name="DEFHeaderLabel" type="Label" parent="Content/ScrollContainer/VBox/DEFHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "DEF"
+
+[node name="DEFBreakdown" type="RichTextLabel" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/normal_font_size = 11
+scroll_active = false
+fit_content_height = true
+
+[node name="SepAfterDEF" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="ATKHeader" type="HBoxContainer" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="Content/ScrollContainer/VBox/ATKHeader"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+texture = ExtResource("4_atk")
+texture_filter = 1
+
+[node name="ATKHeaderLabel" type="Label" parent="Content/ScrollContainer/VBox/ATKHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "ATK"
+
+[node name="ATKBreakdown" type="RichTextLabel" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/normal_font_size = 11
+scroll_active = false
+fit_content_height = true
+
+[node name="SepAfterATK" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="MOVHeader" type="HBoxContainer" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="Content/ScrollContainer/VBox/MOVHeader"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+texture = ExtResource("5_mov")
+texture_filter = 1
+
+[node name="MOVHeaderLabel" type="Label" parent="Content/ScrollContainer/VBox/MOVHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "MOV"
+
+[node name="MOVBreakdown" type="RichTextLabel" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/normal_font_size = 11
+scroll_active = false
+fit_content_height = true
+
+[node name="SepAfterMOV" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="APHeader" type="HBoxContainer" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="Content/ScrollContainer/VBox/APHeader"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+texture = ExtResource("6_ap")
+texture_filter = 1
+
+[node name="APHeaderLabel" type="Label" parent="Content/ScrollContainer/VBox/APHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "AP"
+
+[node name="APBreakdown" type="RichTextLabel" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/normal_font_size = 11
+scroll_active = false
+fit_content_height = true
+
+[node name="SepAfterAP" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RNGHeader" type="HBoxContainer" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="Content/ScrollContainer/VBox/RNGHeader"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+expand_mode = 3
+stretch_mode = 5
+texture = ExtResource("7_rng")
+texture_filter = 1
+
+[node name="RNGHeaderLabel" type="Label" parent="Content/ScrollContainer/VBox/RNGHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "RNG"
+
+[node name="RNGBreakdown" type="RichTextLabel" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/normal_font_size = 11
+scroll_active = false
+fit_content_height = true
+
+[node name="SepAfterRNG" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Separator3" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="WeaponHeader" type="Label" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "WEAPON"
+
+[node name="WeaponLabel" type="Label" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+autowrap_mode = 2
+
+[node name="Separator4" type="HSeparator" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+
+[node name="EffectsHeader" type="Label" parent="Content/ScrollContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.7, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "EFFECTS"
+
+[node name="EffectsContainer" type="HFlowContainer" parent="Content/ScrollContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4

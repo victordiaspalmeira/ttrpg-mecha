@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="EncounterData" format=3]
+[gd_resource type="Resource" script_class="EncounterData" format=3 uid="uid://ci8inr3k4gbky"]
 
-[ext_resource type="Script" path="res://scripts/data/encounter_data.gd" id="1_enc"]
-[ext_resource type="Script" path="res://scripts/data/encounter_spawn.gd" id="2_spawn"]
-[ext_resource type="Script" path="res://scripts/data/team_data.gd" id="3_team"]
+[ext_resource type="Script" uid="uid://cdjoedf3qgkn2" path="res://scripts/data/encounter_data.gd" id="1_enc"]
+[ext_resource type="Script" uid="uid://cm5j4x40fy4u2" path="res://scripts/data/encounter_spawn.gd" id="2_spawn"]
+[ext_resource type="Script" uid="uid://h1aayv4rm242" path="res://scripts/data/team_data.gd" id="3_team"]
 [ext_resource type="Resource" path="res://data/templates/assault.tres" id="4_player"]
 [ext_resource type="Resource" path="res://data/templates/bastion.tres" id="5_player2"]
 [ext_resource type="Resource" path="res://data/templates/sniper.tres" id="6_player3"]
@@ -12,19 +12,15 @@
 [sub_resource type="Resource" id="spawn_player1"]
 script = ExtResource("2_spawn")
 template = ExtResource("4_player")
-q = 0
-r = 0
 
 [sub_resource type="Resource" id="spawn_player2"]
 script = ExtResource("2_spawn")
 template = ExtResource("5_player2")
 q = 1
-r = 0
 
 [sub_resource type="Resource" id="spawn_player3"]
 script = ExtResource("2_spawn")
 template = ExtResource("6_player3")
-q = 0
 r = 1
 
 [sub_resource type="Resource" id="spawn_enemy1"]
@@ -56,6 +52,7 @@ hp_bar_full_color = Color(1, 0.32, 0.24, 1)
 script = ExtResource("1_enc")
 encounter_id = "test_skirmish"
 display_name = "Test Skirmish"
+description = "A small-scale skirmish to test your mechs. Defeat all enemy units to secure victory."
 grid_radius = 5
-teams = [SubResource("team_player"), SubResource("team_enemy")]
-spawns = [SubResource("spawn_player1"), SubResource("spawn_player2"), SubResource("spawn_player3"), SubResource("spawn_enemy1"), SubResource("spawn_enemy2")]
+teams = Array[ExtResource("3_team")]([SubResource("team_player"), SubResource("team_enemy")])
+spawns = Array[ExtResource("2_spawn")]([SubResource("spawn_player1"), SubResource("spawn_player2"), SubResource("spawn_player3"), SubResource("spawn_enemy1"), SubResource("spawn_enemy2")])

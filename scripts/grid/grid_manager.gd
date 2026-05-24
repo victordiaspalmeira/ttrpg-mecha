@@ -39,6 +39,30 @@ func initialize(encounter: EncounterData = null) -> void:
 	clear_grid()
 	_grid_radius = radius
 	generate_grid(radius)
+	
+	# Apply tile overrides from encounter (terrain, obstacles, elevation, etc.)
+	if encounter:
+		_apply_tile_overrides(encounter.tile_overrides)
+
+
+## Applies tile overrides to the grid (terrain, obstacles, elevation).
+func _apply_tile_overrides(overrides: Array[EncounterTileOverride]) -> void:
+	for override in overrides:
+		if not override:
+			continue
+		var tile: HexTile = get_tile(override.q, override.r)
+		if not tile:
+			continue
+		if override.terrain:
+			tile.terrain = override.terrain
+		if override.elevation != 0.0:
+			tile.elevation = override.elevation
+		if override.obstacle_id != "":
+			tile.obstacle_id = override.obstacle_id
+		if override.custom_move_cost > 0:
+			tile.custom_move_cost = override.custom_move_cost
+		if not override.tags.is_empty():
+			tile.tags = override.tags
 
 
 func clear_grid() -> void:
@@ -84,6 +108,75 @@ func get_distance(tile_a: HexTile, tile_b: HexTile) -> int:
 	return HexMath.axial_distance_tiles(tile_a, tile_b)
 
 
+## A* pathfinding with variable move costs (uses tile.get_move_cost()).
+## Returns an ordered Array[HexTile] from start to goal (empty if unreachable).
+func find_path_astar(start: HexTile, goal: HexTile, max_cost: int = -1) -> Array[HexTile]:
+	if start == null or goal == null:
+		return []
+	if start == goal:
+		return [start]
+	if goal.is_blocking_tile():
+		return []
+
+	var came_from: Dictionary = {}
+	var g_score: Dictionary = {}
+	var f_score: Dictionary = {}
+	var open_set: Array[HexTile] = [start]
+
+	var start_key: Vector2i = Vector2i(start.q, start.r)
+	var goal_key: Vector2i = Vector2i(goal.q, goal.r)
+	g_score[start_key] = 0
+	f_score[start_key] = HexMath.axial_distance(start.q, start.r, goal.q, goal.r)
+
+	while not open_set.is_empty():
+		# Find tile with lowest f_score in open_set
+		var current: HexTile = open_set[0]
+		var current_key: Vector2i = Vector2i(current.q, current.r)
+		var current_f: int = f_score.get(current_key, 999999)
+		for tile in open_set:
+			var k: Vector2i = Vector2i(tile.q, tile.r)
+			var f: int = f_score.get(k, 999999)
+			if f < current_f:
+				current = tile
+				current_key = k
+				current_f = f
+
+		# Reached goal?
+		if current == goal:
+			return _reconstruct_path(came_from, current)
+
+		open_set.erase(current)
+		var g_current: int = g_score.get(current_key, 999999)
+
+		for neighbor in get_neighbors(current):
+			if neighbor.is_blocking_tile():
+				continue
+			var neighbor_key: Vector2i = Vector2i(neighbor.q, neighbor.r)
+			var move_cost: int = neighbor.get_move_cost()
+			var tentative_g: int = g_current + move_cost
+
+			# If max_cost limit, prune paths that exceed it
+			if max_cost > 0 and tentative_g > max_cost:
+				continue
+
+			if tentative_g < g_score.get(neighbor_key, 999999):
+				came_from[neighbor_key] = current
+				g_score[neighbor_key] = tentative_g
+				var h: int = HexMath.axial_distance(neighbor.q, neighbor.r, goal.q, goal.r)
+				f_score[neighbor_key] = tentative_g + h
+				if not open_set.has(neighbor):
+					open_set.append(neighbor)
+
+	return []  # No path found
+
+
+## Reconstructs path from came_from dictionary.
+func _reconstruct_path(came_from: Dictionary, current: HexTile) -> Array[HexTile]:
+	var path: Array[HexTile] = [current]
+	while came_from.has(Vector2i(current.q, current.r)):
+		current = came_from[Vector2i(current.q, current.r)]
+		path.push_front(current)
+	return path
 func get_neighbors(tile: HexTile) -> Array[HexTile]:
 	var neighbors: Array[HexTile] = []
 
