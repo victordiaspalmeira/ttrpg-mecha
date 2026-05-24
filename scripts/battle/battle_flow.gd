@@ -7,8 +7,8 @@ signal target_hit(target: UnitBase, damage: int)
 
 @export var encounter: EncounterData
 
-@onready var _world: Node3D = %World
-@onready var _units_container: Node3D = %Units
+var _world: Node3D = null
+var _units_container: Node3D = null
 
 var grid_manager: GridManager = null
 var selection_state: SelectionState = null
@@ -23,6 +23,13 @@ var audio_manager: AudioManager = null
 var path_preview: GridPathPreview = null
 var particle_manager: ParticleManager = null
 var cinematic_player: CinematicPlayer = null
+
+# Services
+var attack_line_effect: AttackLineEffect = null
+var impact_effect: ImpactEffect = null
+var tile_flash: TileFlashEffect = null
+var camera_service: CameraService = null
+var passive_service: PassiveService = null
 
 var _battle_over: bool = false
 var _winner_team: String = ""
@@ -50,7 +57,7 @@ func setup(
 	battle_input = p_battle_input
 	enemy_brain = p_enemy_brain
 	audio_manager = p_audio_manager
-	path_preview = _world.get_node_or_null("GridPathPreview") as GridPathPreview
+	path_preview = %World/GridPathPreview as GridPathPreview
 
 	turn_controller.current_unit_changed.connect(_on_current_unit_changed)
 	selection_state.action_mode_changed.connect(func(_mode: SelectionState.ActionMode) -> void: update_path_preview())
@@ -60,6 +67,21 @@ func setup(
 
 	if audio_manager:
 		audio_manager.setup(combat_resolver, turn_controller, self)
+
+	# Inject dependencies into BattleHud
+	if battle_hud:
+		var camera: Camera3D = %World/CameraRig/CameraPitch/Camera3D as Camera3D
+		var units_container := %World/Units as Node3D
+		battle_hud.setup(selection_state, turn_controller, units_container, audio_manager, camera)
+
+	# Inject dependencies into UnitSpawner (so spawned units get their refs)
+	if unit_spawner:
+		unit_spawner.setup(audio_manager, battle_hud, selection_state)
+
+	# Inject dependencies into SkillExecutor
+	var skill_executor_node := %SkillExecutor as SkillExecutor
+	if skill_executor_node:
+		skill_executor_node.setup(particle_manager, battle_hud, audio_manager, grid_manager, passive_service)
 
 
 func start_battle() -> void:
@@ -179,7 +201,8 @@ func try_move_to_hovered_tile() -> bool:
 			MovementRules.get_move_failure_reason(unit, target_tile, grid_manager)
 		)
 		# Flash tile red for invalid move feedback
-		_flash_tile_red(target_tile)
+		if tile_flash:
+			tile_flash.flash_tile_red(target_tile)
 		return false
 
 	var moved: bool = execute_move(unit, target_tile)
@@ -314,38 +337,6 @@ func _apply_attack_damage(attacker: UnitBase, target: UnitBase, damage: int) -> 
 	target_hit.emit(target, damage)
 
 
-## Shows a brief attack line between attacker and target.
-func _show_attack_line(attacker: UnitBase, target: UnitBase) -> void:
-	var line := MeshInstance3D.new()
-	var mesh := CylinderMesh.new()
-	mesh.radial_segments = 4
-	mesh.top_radius = 0.02
-	mesh.bottom_radius = 0.02
-	mesh.height = 1.0  # will be scaled
-	line.mesh = mesh
-	
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.8, 0.2, 0.8)
-	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	line.material_override = mat
-	
-	_world.add_child(line)
-	
-	var start_pos := attacker.global_position + Vector3.UP * 0.5
-	var end_pos := target.global_position + Vector3.UP * 0.5
-	var mid_point := (start_pos + end_pos) / 2.0
-	var direction := (end_pos - start_pos)
-	var length := direction.length()
-	
-	line.global_position = mid_point
-	line.look_at(end_pos, Vector3.UP)
-	line.scale = Vector3(1, 1, length)
-	
-	# Fade out
-	var tween := create_tween()
-	tween.tween_property(line, "modulate:a", 0.0, 0.3)
-	tween.tween_callback(line.queue_free)
 
 
 func end_turn() -> void:
@@ -438,63 +429,6 @@ func _show_result_banner(message: String) -> void:
 	get_tree().quit()
 
 
-## Briefly focuses the camera on a target position.
-func _camera_look_at(target: UnitBase) -> void:
-	if not target or not battle_hud:
-		return
-	var cam_controller: Node3D = battle_hud.camera_controller
-	if cam_controller:
-		cam_controller.focus_on_unit(target)
-
-
-## Shows a brief impact effect at the target position.
-func _show_impact_effect(target: UnitBase) -> void:
-	if not target:
-		return
-	# Create a simple expanding ring effect
-	var ring := MeshInstance3D.new()
-	var mesh := CylinderMesh.new()
-	mesh.radial_segments = 16
-	mesh.top_radius = 0.3
-	mesh.bottom_radius = 0.3
-	mesh.height = 0.02
-	ring.mesh = mesh
-	ring.global_position = target.global_position + Vector3.UP * 0.1
-	
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.8, 0.2, 0.7)
-	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	ring.material_override = mat
-	
-	_world.add_child(ring)
-	
-	# Expand and fade
-	var tween := create_tween()
-	tween.tween_property(ring, "scale", Vector3(2.5, 1, 2.5), 0.3)
-	tween.parallel().tween_property(ring, "modulate:a", 0.0, 0.3)
-	tween.tween_callback(ring.queue_free)
-
-
-## Flashes a tile red briefly to indicate invalid action.
-func _flash_tile_red(tile: HexTile) -> void:
-	if not tile or not tile.highlight_overlay:
-		return
-	var overlay := tile.highlight_overlay
-	overlay.visible = true
-	# Create a red material for the flash
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.2, 0.2, 0.6)
-	mat.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
-	overlay.material_override = mat
-	# Fade out
-	var tween := create_tween()
-	tween.tween_property(overlay, "modulate:a", 0.0, 0.4)
-	tween.tween_callback(func():
-		overlay.visible = false
-		overlay.modulate.a = 1.0
-	)
-
 
 func _refresh_action_highlights() -> void:
 	grid_highlights.invalidate_cache()
@@ -515,37 +449,64 @@ func _bootstrap() -> void:
 
 	# Usa o encontro selecionado do GameManager, se disponível
 	if GameManager and GameManager.selected_encounter:
-		encounter = GameManager.selected_encounter
+		encounter = GameManager.selected_encounter as EncounterData
 
 	setup(
-		_world.get_node("GridManager") as GridManager,
-		session.get_node("SelectionState") as SelectionState,
-		session.get_node("GridHighlights") as GridHighlights,
-		session.get_node("CombatResolver") as CombatResolver,
-		session.get_node("TurnController") as TurnController,
-		session.get_node("BattleHud") as BattleHud,
-		session.get_node("UnitSpawner") as UnitSpawner,
-		session.get_node("BattleInput") as BattleInput,
-		session.get_node("EnemyBrain") as EnemyBrain,
-		session.get_node("AudioManager") as AudioManager,
+		%World/GridManager as GridManager,
+		%SelectionState as SelectionState,
+		%GridHighlights as GridHighlights,
+		%CombatResolver as CombatResolver,
+		%TurnController as TurnController,
+		%BattleHud as BattleHud,
+		%UnitSpawner as UnitSpawner,
+		%BattleInput as BattleInput,
+		%EnemyBrain as EnemyBrain,
+		%AudioManager as AudioManager,
 	)
 
+	_world = %World as Node3D
+	_units_container = %World/Units as Node3D
+
 	# Initialize particle manager
-	particle_manager = session.get_node("ParticleManager") as ParticleManager
+	particle_manager = %ParticleManager as ParticleManager
 	if not particle_manager:
 		particle_manager = ParticleManager.new()
 		particle_manager.name = "ParticleManager"
 		session.add_child(particle_manager)
 
 	# Initialize cinematic player
-	cinematic_player = session.get_node_or_null("CinematicPlayer") as CinematicPlayer
+	cinematic_player = %CinematicPlayer as CinematicPlayer
 	if not cinematic_player:
 		cinematic_player = CinematicPlayer.new()
 		cinematic_player.name = "CinematicPlayer"
 		session.add_child(cinematic_player)
 
-	# Connect passive feedback callback
-	PassiveSystem.feedback_callback = func(unit: UnitBase, text: String, color: Color):
+	# Create visual effect services (not in the scene, always created at runtime)
+	attack_line_effect = AttackLineEffect.new()
+	attack_line_effect.name = "AttackLineEffect"
+	session.add_child(attack_line_effect)
+
+	impact_effect = ImpactEffect.new()
+	impact_effect.name = "ImpactEffect"
+	session.add_child(impact_effect)
+
+	tile_flash = TileFlashEffect.new()
+	tile_flash.name = "TileFlashEffect"
+	session.add_child(tile_flash)
+
+	camera_service = CameraService.new()
+	camera_service.name = "CameraService"
+	session.add_child(camera_service)
+
+	# Initialize passive service
+	passive_service = session.get_node_or_null("PassiveService") as PassiveService
+	if not passive_service:
+		passive_service = PassiveService.new()
+		passive_service.name = "PassiveService"
+		session.add_child(passive_service)
+	passive_service.setup(grid_manager)
+	passive_service.passive_triggered.connect(func(unit: UnitBase, text: String, color: Color):
 		PassiveFeedback.show(unit, text, color)
+	)
 
 	start_battle()

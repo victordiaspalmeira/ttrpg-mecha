@@ -1,32 +1,35 @@
 [gd_scene format=3 uid="uid://rnvmwxwg1gj6"]
 
-[ext_resource type="PackedScene" uid="uid://cwl2q4wwq10yk" path="res://scenes/grid/HexTile3D.tscn" id="1_3hov6"]
-[ext_resource type="Script" uid="uid://cf64jr78ejp6m" path="res://scripts/grid/grid_manager.gd" id="1_grid"]
-[ext_resource type="Resource" uid="uid://dkgsw7mfjoqcb" path="res://data/grid/default_grid_config.tres" id="1_gridcfg"]
-[ext_resource type="PackedScene" uid="uid://bxaf8sg4b8btq" path="res://scenes/units/unit_base.tscn" id="2_unit"]
-[ext_resource type="Script" uid="uid://c6tk4442fbsj0" path="res://scripts/battle/battle_flow.gd" id="3_flow"]
-[ext_resource type="Script" uid="uid://70j77mfw2bul" path="res://scripts/battle/selection_state.gd" id="4_sel"]
-[ext_resource type="Script" uid="uid://5tn5sy8qt1fv" path="res://scripts/battle/turn_controller.gd" id="5_turn"]
-[ext_resource type="Script" uid="uid://dcdcp2dld8pqh" path="res://scripts/battle/combat_resolver.gd" id="6_combat"]
-[ext_resource type="Script" uid="uid://8rrgjf5yxn6a" path="res://scripts/presentation/battle_hud.gd" id="7_hud"]
-[ext_resource type="Script" uid="uid://d2sl8vbceaglp" path="res://scripts/presentation/grid_highlights.gd" id="8_hi"]
-[ext_resource type="PackedScene" uid="uid://duia12i8tcwgx" path="res://scenes/ui/unit_hp_bar.tscn" id="9_hp"]
-[ext_resource type="PackedScene" uid="uid://cks42uns6k601" path="res://scenes/ui/turn_order_item.tscn" id="10_to"]
-[ext_resource type="PackedScene" uid="uid://dq3rudcty2ua3" path="res://scenes/ui/damage_popup.tscn" id="11_dmg"]
-[ext_resource type="Script" uid="uid://bq7yuyvgyaywf" path="res://scripts/systems/unit_spawner.gd" id="12_spawn"]
-[ext_resource type="Script" uid="uid://b6mhb1ova5orl" path="res://scripts/battle/battle_input.gd" id="13_input"]
-[ext_resource type="Script" uid="uid://ci3hqhwh1fa21" path="res://scripts/core/camera_controller.gd" id="14_cam"]
-[ext_resource type="Resource" path="res://data/encounters/test_skirmish.tres" id="15_enc"]
-[ext_resource type="Script" uid="uid://cp8hu7o8ylerc" path="res://scripts/battle/enemy_brain.gd" id="16_brain"]
-[ext_resource type="PackedScene" uid="uid://b0hk6xljijuoi" path="res://scenes/ui/turn_announce.tscn" id="17_announce"]
-[ext_resource type="Resource" uid="uid://cawuehlu7x2sh" path="res://data/ai/simple_chase_behavior.tres" id="18_ai"]
-[ext_resource type="Script" uid="uid://c5gl1fdcgoctr" path="res://scripts/systems/audio_manager.gd" id="19_audio"]
-[ext_resource type="AudioStream" uid="uid://d1njnh8k0x13q" path="res://assets/audio/UI_Menu/013_Confirm_03.wav" id="audio_click"]
-[ext_resource type="AudioStream" uid="uid://duw0psg2kxosb" path="res://assets/audio/UI_Menu/001_Hover_01.wav" id="audio_hover"]
-[ext_resource type="AudioStream" uid="uid://b5rqp4mufwlf7" path="res://assets/audio/UI_Menu/070_Equip_10.wav" id="audio_turn_start"]
-[ext_resource type="Script" uid="uid://dm2chm2doul65" path="res://scripts/presentation/grid_path_preview.gd" id="grid_path_preview"]
-[ext_resource type="Script" uid="uid://skill_executor" path="res://scripts/skills/skill_executor.gd" id="skill_exec"]
-[ext_resource type="Script" uid="uid://particle_mgr" path="res://scripts/systems/particle_manager.gd" id="particle_mgr"]
+[ext_resource type="PackedScene" uid="uid://cwl2q4wwq10yk" path="res://scenes/grid/HexTile3D.tscn" id="1"]
+[ext_resource type="Script" uid="uid://cf64jr78ejp6m" path="res://scripts/grid/grid_manager.gd" id="2"]
+[ext_resource type="Resource" uid="uid://dkgsw7mfjoqcb" path="res://data/grid/default_grid_config.tres" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/units/unit_base.tscn" id="4"]
+[ext_resource type="Script" uid="uid://c6tk4442fbsj0" path="res://scripts/battle/battle_flow.gd" id="5"]
+[ext_resource type="Script" uid="uid://70j77mfw2bul" path="res://scripts/battle/selection_state.gd" id="6"]
+[ext_resource type="Script" uid="uid://5tn5sy8qt1fv" path="res://scripts/battle/turn_controller.gd" id="7"]
+[ext_resource type="Script" uid="uid://dcdcp2dld8pqh" path="res://scripts/battle/combat_resolver.gd" id="8"]
+[ext_resource type="Script" uid="uid://8rrgjf5yxn6a" path="res://scripts/presentation/battle_hud.gd" id="9"]
+[ext_resource type="Script" uid="uid://d2sl8vbceaglp" path="res://scripts/presentation/grid_highlights.gd" id="10"]
+[ext_resource type="PackedScene" uid="uid://duia12i8tcwgx" path="res://scenes/ui/unit_hp_bar.tscn" id="11"]
+[ext_resource type="PackedScene" uid="uid://cks42uns6k601" path="res://scenes/ui/turn_order_item.tscn" id="12"]
+[ext_resource type="PackedScene" uid="uid://dq3rudcty2ua3" path="res://scenes/ui/damage_popup.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://scenes/ui/unit_info_panel.tscn" id="14"]
+[ext_resource type="Script" uid="uid://bq7yuyvgyaywf" path="res://scripts/systems/unit_spawner.gd" id="15"]
+[ext_resource type="Script" uid="uid://b6mhb1ova5orl" path="res://scripts/battle/battle_input.gd" id="16"]
+[ext_resource type="Script" uid="uid://ci3hqhwh1fa21" path="res://scripts/core/camera_controller.gd" id="17"]
+[ext_resource type="Resource" uid="uid://ci8inr3k4gbky" path="res://data/encounters/test_skirmish.tres" id="18"]
+[ext_resource type="Script" uid="uid://cp8hu7o8ylerc" path="res://scripts/battle/enemy_brain.gd" id="19"]
+[ext_resource type="PackedScene" uid="uid://b0hk6xljijuoi" path="res://scenes/ui/turn_announce.tscn" id="20"]
+[ext_resource type="Resource" uid="uid://cawuehlu7x2sh" path="res://data/ai/simple_chase_behavior.tres" id="21"]
+[ext_resource type="Script" uid="uid://c5gl1fdcgoctr" path="res://scripts/systems/audio_manager.gd" id="22"]
+[ext_resource type="AudioStream" uid="uid://d1njnh8k0x13q" path="res://assets/audio/UI_Menu/013_Confirm_03.wav" id="23"]
+[ext_resource type="AudioStream" uid="uid://duw0psg2kxosb" path="res://assets/audio/UI_Menu/001_Hover_01.wav" id="24"]
+[ext_resource type="AudioStream" uid="uid://b5rqp4mufwlf7" path="res://assets/audio/UI_Menu/070_Equip_10.wav" id="25"]
+[ext_resource type="Script" uid="uid://dm2chm2doul65" path="res://scripts/presentation/grid_path_preview.gd" id="26"]
+[ext_resource type="Script" uid="uid://c7ot5vwjnj22v" path="res://scripts/skills/skill_executor.gd" id="27"]
+[ext_resource type="Script" uid="uid://ckgyyc44w3bgc" path="res://scripts/systems/particle_manager.gd" id="28"]
+[ext_resource type="Script" path="res://scripts/presentation/cinematic_player.gd" id="29"]
+[ext_resource type="PackedScene" uid="uid://unit_details_panel" path="res://scenes/ui/unit_details_panel.tscn" id="30"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action"]
 content_margin_left = 12.0
@@ -44,22 +47,6 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
-content_margin_left = 10.0
-content_margin_top = 10.0
-content_margin_right = 10.0
-content_margin_bottom = 10.0
-bg_color = Color(0.09, 0.11, 0.15, 0.94)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.35, 0.45, 0.58, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_turnbar"]
 content_margin_left = 16.0
 content_margin_top = 8.0
@@ -69,156 +56,140 @@ bg_color = Color(0.08, 0.1, 0.13, 0.88)
 border_width_bottom = 2
 border_color = Color(0.25, 0.35, 0.5, 1)
 
-[node name="BattleScene" type="Node3D" unique_id=1945933856]
+[node name="BattleScene" type="Node3D" unique_id=2056967882]
 
-[node name="BattleSession" type="Node" parent="." unique_id=748792474]
-unique_name_in_owner = true
+[node name="BattleSession" type="Node" parent="." unique_id=858199780]
 
-[node name="SelectionState" type="Node" parent="BattleSession" unique_id=1395433468]
+[node name="SelectionState" type="Node" parent="BattleSession" unique_id=2114718929]
 unique_name_in_owner = true
-script = ExtResource("4_sel")
+script = ExtResource("6")
 
-[node name="TurnController" type="Node" parent="BattleSession" unique_id=1808087854]
+[node name="TurnController" type="Node" parent="BattleSession" unique_id=1646289756]
 unique_name_in_owner = true
-script = ExtResource("5_turn")
+script = ExtResource("7")
 
-[node name="CombatResolver" type="Node" parent="BattleSession" unique_id=658875220]
+[node name="CombatResolver" type="Node" parent="BattleSession" unique_id=480921078]
 unique_name_in_owner = true
-script = ExtResource("6_combat")
+script = ExtResource("8")
 
-[node name="BattleHud" type="Node" parent="BattleSession" unique_id=730791773]
+[node name="BattleHud" type="Node" parent="BattleSession" unique_id=1068599481]
 unique_name_in_owner = true
-script = ExtResource("7_hud")
-unit_hp_bar_scene = ExtResource("9_hp")
-turn_order_item_scene = ExtResource("10_to")
-damage_popup_scene = ExtResource("11_dmg")
+script = ExtResource("9")
+unit_hp_bar_scene = ExtResource("11")
+turn_order_item_scene = ExtResource("12")
+damage_popup_scene = ExtResource("13")
 
-[node name="GridHighlights" type="Node" parent="BattleSession" unique_id=534865252]
+[node name="GridHighlights" type="Node" parent="BattleSession" unique_id=2088635646]
 unique_name_in_owner = true
-script = ExtResource("8_hi")
+script = ExtResource("10")
 
-[node name="UnitSpawner" type="Node" parent="BattleSession" unique_id=710178803]
+[node name="UnitSpawner" type="Node" parent="BattleSession" unique_id=926263304]
 unique_name_in_owner = true
-script = ExtResource("12_spawn")
-mech_unit_scene = ExtResource("2_unit")
+script = ExtResource("15")
+mech_unit_scene = ExtResource("4")
 
-[node name="BattleInput" type="Node" parent="BattleSession" unique_id=1293404869]
+[node name="BattleInput" type="Node" parent="BattleSession" unique_id=1777926585]
 unique_name_in_owner = true
-script = ExtResource("13_input")
+script = ExtResource("16")
 
-[node name="EnemyBrain" type="Node" parent="BattleSession" unique_id=1672926489]
+[node name="EnemyBrain" type="Node" parent="BattleSession" unique_id=793005537]
 unique_name_in_owner = true
-script = ExtResource("16_brain")
-default_behavior = ExtResource("18_ai")
+script = ExtResource("19")
+default_behavior = ExtResource("21")
 
-[node name="BattleFlow" type="Node" parent="BattleSession" unique_id=258961775]
+[node name="BattleFlow" type="Node" parent="BattleSession" unique_id=93383624]
 unique_name_in_owner = true
-script = ExtResource("3_flow")
-encounter = ExtResource("15_enc")
+script = ExtResource("5")
+encounter = ExtResource("18")
 
-[node name="SkillExecutor" type="Node" parent="BattleSession" unique_id=990000001]
+[node name="SkillExecutor" type="Node" parent="BattleSession" unique_id=345700106]
 unique_name_in_owner = true
-script = ExtResource("skill_exec")
+script = ExtResource("27")
 
-[node name="AudioManager" type="Node" parent="BattleSession" unique_id=1325734932]
+[node name="AudioManager" type="Node" parent="BattleSession" unique_id=1468663831]
 unique_name_in_owner = true
-script = ExtResource("19_audio")
+script = ExtResource("22")
 
-[node name="ParticleManager" type="Node" parent="BattleSession" unique_id=1850000001]
-unique_name_in_owner = true
-script = ExtResource("particle_mgr")
-
-[node name="AudioAttack" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=915229391]
-unique_name_in_owner = true
+[node name="AudioAttack" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=720763520]
 volume_db = -10.0
 
-[node name="AudioMove" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1796737355]
-unique_name_in_owner = true
+[node name="AudioMove" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1323537455]
 volume_db = -10.0
 
-[node name="AudioHit" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=804121127]
-unique_name_in_owner = true
+[node name="AudioHit" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1885295786]
 volume_db = -10.0
 
-[node name="AudioDeath" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=928144066]
-unique_name_in_owner = true
+[node name="AudioDeath" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=379757630]
 volume_db = -10.0
 
-[node name="AudioEndTurn" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=448018891]
-unique_name_in_owner = true
+[node name="AudioEndTurn" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1817781995]
 volume_db = -10.0
 
-[node name="AudioUIHover" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1]
-unique_name_in_owner = true
-stream = ExtResource("audio_hover")
+[node name="AudioUIHover" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1417586736]
+stream = ExtResource("24")
 volume_db = -30.0
 
-[node name="AudioUIClick" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1155111352]
-unique_name_in_owner = true
-stream = ExtResource("audio_click")
+[node name="AudioUIClick" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=408900405]
+stream = ExtResource("23")
 volume_db = -15.0
 
-[node name="AudioTurnStart" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=217052416]
-unique_name_in_owner = true
-stream = ExtResource("audio_turn_start")
+[node name="AudioTurnStart" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1271825221]
+stream = ExtResource("25")
 volume_db = -5.0
 
-[node name="AudioSkillBuff" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000001]
-unique_name_in_owner = true
+[node name="AudioSkillBuff" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1601912332]
 volume_db = -10.0
 
-[node name="AudioSkillDebuff" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000002]
-unique_name_in_owner = true
+[node name="AudioSkillDebuff" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1067333576]
 volume_db = -10.0
 
-[node name="AudioSkillHeal" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000003]
-unique_name_in_owner = true
+[node name="AudioSkillHeal" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=963235369]
 volume_db = -10.0
 
-[node name="AudioSkillDamage" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000004]
-unique_name_in_owner = true
+[node name="AudioSkillDamage" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=176281730]
 volume_db = -10.0
 
-[node name="AudioSkillTurret" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000005]
-unique_name_in_owner = true
+[node name="AudioSkillTurret" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1650112601]
 volume_db = -10.0
 
-[node name="AudioSkillTaunt" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000006]
-unique_name_in_owner = true
+[node name="AudioSkillTaunt" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1930264657]
 volume_db = -10.0
 
-[node name="AudioSkillGrenade" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000007]
-unique_name_in_owner = true
+[node name="AudioSkillGrenade" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=147142494]
 volume_db = -10.0
 
-[node name="AudioInvalid" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=301000008]
-unique_name_in_owner = true
+[node name="AudioInvalid" type="AudioStreamPlayer" parent="BattleSession/AudioManager" unique_id=1747883185]
 volume_db = -15.0
 
-[node name="World" type="Node3D" parent="." unique_id=893958307]
+[node name="ParticleManager" type="Node" parent="BattleSession" unique_id=947943307]
+unique_name_in_owner = true
+script = ExtResource("28")
+
+[node name="CinematicPlayer" type="Node" parent="BattleSession"]
+unique_name_in_owner = true
+script = ExtResource("29")
+
+[node name="World" type="Node3D" parent="." unique_id=1365072598]
 unique_name_in_owner = true
 
-[node name="GridManager" type="Node3D" parent="World" unique_id=181609858]
-unique_name_in_owner = true
-script = ExtResource("1_grid")
-config = ExtResource("1_gridcfg")
-hex_tile_scene = ExtResource("1_3hov6")
+[node name="GridManager" type="Node3D" parent="World" unique_id=582078509]
+script = ExtResource("2")
+config = ExtResource("3")
+hex_tile_scene = ExtResource("1")
 
-[node name="Units" type="Node3D" parent="World" unique_id=277231994]
+[node name="Units" type="Node3D" parent="World" unique_id=69603776]
 unique_name_in_owner = true
 
-[node name="GridPathPreview" type="Node3D" parent="World" unique_id=1326543164]
-script = ExtResource("grid_path_preview")
+[node name="GridPathPreview" type="Node3D" parent="World" unique_id=152837967]
+script = ExtResource("26")
 
-[node name="CameraRig" type="Node3D" parent="World" unique_id=1541699671]
-unique_name_in_owner = true
+[node name="CameraRig" type="Node3D" parent="World" unique_id=1200281087]
 transform = Transform3D(0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
-script = ExtResource("14_cam")
+script = ExtResource("17")
 
-[node name="CameraPitch" type="Node3D" parent="World/CameraRig" unique_id=730673366]
+[node name="CameraPitch" type="Node3D" parent="World/CameraRig" unique_id=583978378]
 
-[node name="Camera3D" type="Camera3D" parent="World/CameraRig/CameraPitch" unique_id=502109153]
-unique_name_in_owner = true
+[node name="Camera3D" type="Camera3D" parent="World/CameraRig/CameraPitch" unique_id=409983464]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, 0, 0, 0)
 projection = 1
 current = true
@@ -226,16 +197,13 @@ fov = 35.0
 size = 14.0
 near = 0.5
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=1493645176]
-unique_name_in_owner = true
+[node name="UI" type="CanvasLayer" parent="." unique_id=1435632816]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="UI" unique_id=2068169564]
+[node name="CanvasLayer" type="CanvasLayer" parent="UI" unique_id=1459082344]
 
-[node name="TurnAnnounce" parent="UI/CanvasLayer" unique_id=1096439655 instance=ExtResource("17_announce")]
-unique_name_in_owner = true
+[node name="TurnAnnounce" parent="UI/CanvasLayer" unique_id=1717051260 instance=ExtResource("20")]
 
-[node name="ActionPanel" type="PanelContainer" parent="UI/CanvasLayer" unique_id=157667862]
-unique_name_in_owner = true
+[node name="ActionPanel" type="PanelContainer" parent="UI/CanvasLayer" unique_id=939639154]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -246,59 +214,54 @@ offset_bottom = -12.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_action")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/CanvasLayer/ActionPanel" unique_id=475778638]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/CanvasLayer/ActionPanel" unique_id=1786439135]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="HeaderLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=296354662]
+[node name="HeaderLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=2088168275]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.72, 0.9, 1)
 theme_override_font_sizes/font_size = 11
 text = "ACTIONS"
 
-[node name="HintLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=582729473]
-unique_name_in_owner = true
+[node name="HintLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=556479644]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.6, 0.68, 1)
 theme_override_font_sizes/font_size = 11
 text = "Move, attack, then end turn."
 autowrap_mode = 2
 
-[node name="ResourcesHBox" type="HBoxContainer" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=269673590]
+[node name="ResourcesHBox" type="HBoxContainer" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=947428791]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MovementLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer/ResourcesHBox" unique_id=1616456780]
-unique_name_in_owner = true
+[node name="MovementLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer/ResourcesHBox" unique_id=1134543760]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 13
 text = "MOV  —"
 
-[node name="APLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer/ResourcesHBox" unique_id=1613926528]
-unique_name_in_owner = true
+[node name="APLabel" type="Label" parent="UI/CanvasLayer/ActionPanel/VBoxContainer/ResourcesHBox" unique_id=524161871]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.82, 0.55, 1)
 theme_override_font_sizes/font_size = 13
 text = "AP  —"
 
-[node name="MoveButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=1679052265]
+[node name="MoveButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=2089388305]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Move"
 
-[node name="ActionButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=618667740]
-unique_name_in_owner = true
+[node name="ActionButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=1546859822]
 layout_mode = 2
 text = "Action"
 
-[node name="EndTurnButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=884703244]
+[node name="EndTurnButton" type="Button" parent="UI/CanvasLayer/ActionPanel/VBoxContainer" unique_id=666478642]
 unique_name_in_owner = true
 layout_mode = 2
 text = "End Turn"
 
-[node name="ActionSubmenu" type="PanelContainer" parent="UI/CanvasLayer" unique_id=4583664]
-unique_name_in_owner = true
+[node name="ActionSubmenu" type="PanelContainer" parent="UI/CanvasLayer" unique_id=312398775]
 visible = false
 custom_minimum_size = Vector2(180, 0)
 anchors_preset = 2
@@ -311,107 +274,65 @@ offset_bottom = -12.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_action")
 
-[node name="ActionSubmenuContainer" type="VBoxContainer" parent="UI/CanvasLayer/ActionSubmenu" unique_id=323275512]
-unique_name_in_owner = true
+[node name="ActionSubmenuContainer" type="VBoxContainer" parent="UI/CanvasLayer/ActionSubmenu" unique_id=278082970]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="HoverInfoPanel" type="PanelContainer" parent="UI/CanvasLayer" unique_id=137944931]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(200, 0)
+[node name="UnitInfoPanel" parent="UI/CanvasLayer" unique_id=1420010314 instance=ExtResource("14")]
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -212.0
-offset_top = -200.0
+offset_left = -232.0
+offset_top = -280.0
 offset_right = -12.0
 offset_bottom = -12.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_hover")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/CanvasLayer/HoverInfoPanel" unique_id=1526238282]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="Portrait" type="TextureRect" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1113891958]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(96, 96)
-layout_mode = 2
-expand_mode = 3
-stretch_mode = 5
-
-[node name="NameLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=939475782]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
-theme_override_font_sizes/font_size = 15
-
-[node name="HPLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1641350745]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.8, 0.88, 1)
-
-[node name="MovementHoverLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=382795391]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="APHoverLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1438438538]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="AttackLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1686404737]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="RangeLabel" type="Label" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1580520776]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="EffectsContainer" type="HFlowContainer" parent="UI/CanvasLayer/HoverInfoPanel/VBoxContainer" unique_id=1580520777]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="TurnOrderBar" type="PanelContainer" parent="UI/CanvasLayer" unique_id=1412219759]
-unique_name_in_owner = true
+[node name="TurnOrderBar" type="PanelContainer" parent="UI/CanvasLayer" unique_id=629762592]
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 72.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_turnbar")
 
-[node name="VBox" type="VBoxContainer" parent="UI/CanvasLayer/TurnOrderBar" unique_id=1026828217]
+[node name="VBox" type="VBoxContainer" parent="UI/CanvasLayer/TurnOrderBar" unique_id=1047976656]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="TurnOrderTitle" type="Label" parent="UI/CanvasLayer/TurnOrderBar/VBox" unique_id=1108241550]
+[node name="TurnOrderTitle" type="Label" parent="UI/CanvasLayer/TurnOrderBar/VBox" unique_id=1814861011]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.62, 0.78, 1)
 theme_override_font_sizes/font_size = 11
 text = "TURN ORDER"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/CanvasLayer/TurnOrderBar/VBox" unique_id=853390553]
-unique_name_in_owner = true
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/CanvasLayer/TurnOrderBar/VBox" unique_id=840823796]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="DamagePopupContainer" type="Control" parent="UI/CanvasLayer" unique_id=2059501079]
-unique_name_in_owner = true
+[node name="DamagePopupContainer" type="Control" parent="UI/CanvasLayer" unique_id=89836212]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="UnitUIContainer" type="Control" parent="UI" unique_id=1313874674]
-unique_name_in_owner = true
+[node name="UnitUIContainer" type="Control" parent="UI" unique_id=80752348]
 layout_mode = 3
 anchors_preset = 0
 
-[node name="VFX" type="Node3D" parent="." unique_id=1769218375]
+[node name="UnitDetailsPanel" parent="UI/CanvasLayer" unique_id=1420010315 instance=ExtResource("30")]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -540
+offset_top = -450
+offset_right = -20
+offset_bottom = -20
+[node name="VFX" type="Node3D" parent="." unique_id=1865831251]
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=325996506]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1608807833]
 transform = Transform3D(0.8660254, -0.43301272, 0.24999999, 0, 0.49999997, 0.86602545, -0.5, -0.75, 0.43301266, 0, 0, 0)

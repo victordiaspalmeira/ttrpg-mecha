@@ -3,9 +3,12 @@ extends Resource
 
 @export var encounter_id := ""
 @export var display_name := ""
+@export var description := ""
+@export var thumbnail: Texture2D = null
 @export var grid_radius := 0
 @export var teams: Array[TeamData] = []
 @export var spawns: Array[EncounterSpawn] = []
+@export var tile_overrides: Array[EncounterTileOverride] = []
 
 
 func get_team_data(team_id: String) -> TeamData:

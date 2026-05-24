@@ -1,14 +1,22 @@
 class_name GridHighlights
 extends Node
 
-@onready var world: Node3D = %World
-@onready var selection_state: SelectionState = %SelectionState
+var world: Node3D = null
+var selection_state: SelectionState = null
 
 var grid_manager: GridManager = null
 var _last_cache_key: String = ""
 
 
 func _ready() -> void:
+	# Find nodes by absolute path
+	world = get_node("/root/BattleScene/World") as Node3D
+	selection_state = get_node("/root/BattleScene/BattleSession/SelectionState") as SelectionState
+
+	if not world or not selection_state:
+		push_error("GridHighlights: missing required scene nodes")
+		return
+
 	grid_manager = world.get_node("GridManager") as GridManager
 
 	selection_state.unit_selected.connect(_on_unit_selected)
