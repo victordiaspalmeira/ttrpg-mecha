@@ -35,16 +35,17 @@ func spawn_unit(
 	if portrait:
 		unit.portrait = portrait
 
-	# Add to tree — this triggers _ready() which calls apply_team_data
+	# Add to tree — this triggers _ready() which calls apply_class_data()
 	units_container.add_child(unit)
 
 	# Inject dependencies into the unit
 	unit.setup(audio_manager, battle_hud, selection_state)
 
-	# Apply team data (colors, etc.) after _ready()
+	# Apply team data (colors, etc.)
 	if team_data:
 		unit.apply_team_data(team_data)
 
+	# Ensure class data is fully applied (weapon overrides may arrive after _ready())
 	# apply_class_data() sets weapons from class_data — call it first so base weapons are set
 	unit.apply_class_data()
 

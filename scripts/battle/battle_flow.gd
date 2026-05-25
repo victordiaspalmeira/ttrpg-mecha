@@ -238,6 +238,42 @@ func execute_move(unit: UnitBase, target_tile: HexTile) -> bool:
 	return true
 
 
+func try_attack_unit(target_unit: UnitBase) -> bool:
+	if _battle_over:
+		return false
+
+	var attacker: UnitBase = selection_state.selected_unit
+
+	if not attacker or attacker != turn_controller.current_unit:
+		return false
+
+	if not is_instance_valid(target_unit):
+		battle_hud.show_action_feedback("No valid target.")
+		return false
+
+	if target_unit.is_same_team(attacker):
+		battle_hud.show_action_feedback("Cannot attack allies.")
+		return false
+
+	# Build attack skill dynamically from weapon (unified with skills system)
+	var attack_skill: SkillData = attacker.get_attack_skill()
+	if not attack_skill:
+		battle_hud.show_action_feedback("No weapon equipped.")
+		return false
+
+	# Check range via skill range
+	if not combat_resolver.is_unit_in_range(attacker, target_unit, attack_skill.skill_range):
+		battle_hud.show_action_feedback("Target is out of range.")
+		return false
+
+	# Check AP via skill AP cost
+	if not attacker.can_spend_ap(attack_skill.ap_cost):
+		battle_hud.show_action_feedback("Not enough AP to attack.")
+		return false
+
+	# Execute via SkillExecutor (unified path)
+	var skill_executor_node := %SkillExecutor as SkillExecutor
+	if not skill_executor_node:
 func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 	var damage: int = attacker.get_total_attack_power()
 
@@ -245,48 +281,25 @@ func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
 	if not combat_resolver.can_attack(attacker, target):
 		return false
 
-	# Spend AP upfront
-	var ap_cost: int = attacker.get_attack_ap_cost()
-	if not attacker.spend_ap(ap_cost):
+	# Spend AP
+	if not attacker.spend_ap(attack_skill.ap_cost):
 		return false
 
 	# Trigger BEFORE_ATTACK event
-	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.BEFORE_ATTACK, attacker, {"target": target})
+	PassiveSystem.trigger_event(PassiveSystem.PassiveEvent.BEFORE_ATTACK, attacker, {"target": target_unit})
 
-	# Show action name popup
-	var weapon := attacker.get_active_weapon()
-	var action_name := weapon.weapon_name if weapon else "Attack"
-	battle_hud.show_action_name_popup(action_name)
-
-	# Cache data before cinematic
-	var target_pos_cached: Vector3 = target.global_position
-	var target_ref: WeakRef = weakref(target)
-
-	if cinematic_player:
-		# Cinematic controls when damage is applied
-		cinematic_player.play_attack_cinematic(attacker, target, func():
-			# Apply actual damage at impact moment
-			_apply_attack_damage(attacker, target, damage)
-			# Show damage popup
-			var target_unit: UnitBase = target_ref.get_ref() as UnitBase
-			if target_unit and is_instance_valid(target_unit):
-				battle_hud.show_damage_popup(target_unit, damage)
-			else:
-				battle_hud.show_damage_popup_at_position(target_pos_cached, damage)
-			battle_hud.update_resource_display(attacker)
-		, particle_manager)
-	else:
-		# Fallback without cinematic - apply damage immediately
+	# Create context and execute
+	var ctx := SkillContext.new(attacker, attack_skill, target_unit)
+	var ok := skill_executor_node.execute(ctx)
+	if ok:
+		selection_state.set_action_mode(SelectionState.ActionMode.NONE)
 		attacker.play_attack_visual()
-		if particle_manager:
-			var start_pos := attacker.global_position + Vector3.UP * 0.5
-			var end_pos := target.global_position + Vector3.UP * 0.5
-			particle_manager.play_projectile(ParticleConfig.EffectType.ATTACK_BULLET, start_pos, end_pos)
-		_apply_attack_damage(attacker, target, damage)
-		battle_hud.show_damage_popup(target, damage)
-		battle_hud.update_resource_display(attacker)
+
+	_apply_attack_damage(attacker, target_unit, attacker.get_total_attack_power())
+	battle_hud.update_resource_display(attacker)
 	
-	return true
+	_refresh_action_highlights()
+	return ok
 
 
 ## Applies the actual damage and triggers post-attack events

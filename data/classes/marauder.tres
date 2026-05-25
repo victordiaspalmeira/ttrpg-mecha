@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+[ext_resource type="Script" path="res://scripts/data/class_data.gd" id="1_c"]
+[ext_resource type="Resource" path="res://data/weapons/starter_rifle.tres" id="2_pri"]
+[ext_resource type="Resource" path="res://data/weapons/vibro_blade.tres" id="3_sec"]
+
+[resource]
+script = ExtResource("1_c")
+class_id = "marauder"
+display_name = "Marauder"
+sprite_variant = "red"
+max_hp = 10
+movement = 5
+max_ap = 5
+defense = 1
+base_attack = 3
+primary_weapon = ExtResource("2_pri")
+secondary_weapon = ExtResource("3_sec")

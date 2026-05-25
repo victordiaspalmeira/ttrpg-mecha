@@ -12,6 +12,7 @@
 script = ExtResource("1_c")
 class_id = "bastion"
 display_name = "Bastion"
+sprite_variant = "orange"
 max_hp = 12
 movement = 3
 max_ap = 5

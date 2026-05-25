@@ -12,6 +12,7 @@
 script = ExtResource("1_c")
 class_id = "sniper"
 display_name = "Sniper"
+sprite_variant = "cyan"
 max_hp = 6
 movement = 5
 max_ap = 5
