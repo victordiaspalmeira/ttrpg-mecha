@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnitTemplate" format=3]
+[ext_resource type="Script" path="res://scripts/data/unit_template.gd" id="1_t"]
+[ext_resource type="Resource" path="res://data/classes/phaser.tres" id="2_c"]
+
+[resource]
+script = ExtResource("1_t")
+template_id = "phaser"
+display_name = "Phaser"
+class_data = ExtResource("2_c")
+team_id = "player"

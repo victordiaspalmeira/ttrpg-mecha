@@ -42,7 +42,7 @@ var camera_controller: Node3D:
 
 var _display_unit: UnitBase = null
 var _battle_finished := false
-var _pending_skill: SkillData = null
+var _pending_action: SkillData = null
 var _setup_done := false
 
 
@@ -226,8 +226,8 @@ func show_action_name_popup(action_name: String, duration := 1.2) -> void:
 func _on_action_mode_changed(mode: SelectionState.ActionMode) -> void:
 	_style_action_buttons(mode)
 	action_submenu_ui.hide()
-	if mode != SelectionState.ActionMode.SKILL:
-		_pending_skill = null
+	if mode != SelectionState.ActionMode.ACTION:
+		_pending_action = null
 
 
 func _on_action_button_pressed() -> void:
@@ -245,7 +245,7 @@ func _style_action_buttons(mode: SelectionState.ActionMode) -> void:
 	match mode:
 		SelectionState.ActionMode.MOVE:
 			_highlight_button(move_button, color_on)
-		SelectionState.ActionMode.ATTACK:
+		SelectionState.ActionMode.ACTION:
 			_highlight_button(action_button, color_on)
 
 
@@ -322,19 +322,19 @@ func _set_player_controls_enabled(enabled: bool) -> void:
 # Skill execution (called from BattleInput)
 # ------------------------------------------------------------------------------
 
-func _enter_skill_mode(skill: SkillData) -> void:
-	_pending_skill = skill
+func _enter_action_mode(skill: SkillData) -> void:
+	_pending_action = skill
 	if selection_state:
-		selection_state.set_action_mode(SelectionState.ActionMode.SKILL)
+		selection_state.set_action_mode(SelectionState.ActionMode.ACTION)
 
 
-func _execute_skill_on_target(target_unit: UnitBase, target_tile: HexTile = null) -> void:
-	if not _pending_skill or not _display_unit:
+func _execute_action_on_target(target_unit: UnitBase, target_tile: HexTile = null) -> void:
+	if not _pending_action or not _display_unit:
 		return
 	var scene_root: Node = _display_unit.get_tree().current_scene
 	var executor: SkillExecutor = scene_root.get_node("BattleSession/SkillExecutor")
-	var ctx := SkillContext.new(_display_unit, _pending_skill, target_unit, target_tile)
+	var ctx := SkillContext.new(_display_unit, _pending_action, target_unit, target_tile)
 	if executor.execute(ctx):
-		_display_unit.spend_ap(_pending_skill.ap_cost)
+		_display_unit.spend_ap(_pending_action.ap_cost)
 		update_resource_display(_display_unit)
-	_pending_skill = null
+	_pending_action = null

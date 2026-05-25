@@ -68,11 +68,18 @@ func execute(ctx: SkillContext) -> bool:
 	# Play skill cinematic + particles
 	if cinematic_player and not ctx.affected_units.is_empty():
 		var primary_effect := _determine_particle_effect(ctx, false)
-		cinematic_player.play_skill_cinematic(ctx.caster, ctx.affected_units, primary_effect, func():
-			# Show action name popup after cinematic
-			if battle_hud:
-				battle_hud.show_action_name_popup(ctx.skill.skill_name)
-		, particle_manager)
+		var is_self_cast := ctx.affected_units.size() == 1 and ctx.affected_units[0] == ctx.caster
+		if is_self_cast:
+			cinematic_player.play_self_cast_cinematic(ctx.caster, primary_effect, func():
+				if battle_hud:
+					battle_hud.show_action_name_popup(ctx.skill.skill_name)
+			, particle_manager)
+		else:
+			cinematic_player.play_skill_cinematic(ctx.caster, ctx.affected_units, primary_effect, func():
+				# Show action name popup after cinematic
+				if battle_hud:
+					battle_hud.show_action_name_popup(ctx.skill.skill_name)
+			, particle_manager)
 	else:
 		# Fallback: just play particles
 		_play_skill_particles(ctx, false)

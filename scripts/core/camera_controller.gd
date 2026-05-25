@@ -135,3 +135,72 @@ func focus_on_unit(unit: UnitBase):
 	).set_ease(
 		Tween.EASE_OUT
 	)
+
+
+## Close-up zoom on a unit for cinematic moments (self-cast, buffs, etc).
+## Lowers the camera rig and reduces zoom for a dramatic close-up.
+func focus_close_up(unit: UnitBase):
+
+	if not unit:
+		return
+
+	var target_pos := unit.global_position + Vector3(0, 0.6, 0)
+	var original_size := camera.size
+	var close_size := maxi(min_zoom, 5)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+
+	tween.tween_property(
+		self,
+		"global_position",
+		target_pos,
+		0.35
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	tween.tween_property(
+		camera,
+		"size",
+		close_size,
+		0.35
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+## Restores camera to a normal zoom level, optionally focusing on a unit.
+func restore_zoom(unit: UnitBase = null):
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+
+	if unit:
+		var target_pos := unit.global_position
+		target_pos.y = global_position.y
+		tween.tween_property(
+			self,
+			"global_position",
+			target_pos,
+			0.35
+		).set_trans(
+			Tween.TRANS_SINE
+		).set_ease(
+			Tween.EASE_OUT
+		)
+
+	tween.tween_property(
+		camera,
+		"size",
+		14.0,
+		0.35
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)

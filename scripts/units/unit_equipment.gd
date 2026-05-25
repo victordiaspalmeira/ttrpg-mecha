@@ -41,6 +41,45 @@ func get_weapon_power() -> int:
 	return weapon.weapon_power if weapon else 0
 
 
+## Generates a SkillData representing the active weapon's basic attack.
+## This unifies weapon attacks with the skill system.
+func get_attack_as_skill() -> SkillData:
+	var weapon := get_active_weapon()
+	if not weapon:
+		return null
+	var skill := SkillData.new()
+	skill.skill_id = "weapon_attack_" + weapon.weapon_id
+	skill.skill_name = weapon.weapon_name
+	skill.description = "Attack with %s" % weapon.weapon_name
+	skill.ap_cost = weapon.attack_ap_cost
+	skill.skill_range = weapon.weapon_range
+	skill.target_mode = SkillData.TargetMode.SINGLE_UNIT
+	skill.team_filter = SkillData.TeamFilter.ENEMY
+	
+	var dmg_effect := SkillEffect.new()
+	dmg_effect.effect_type = SkillEffect.EffectType.DAMAGE
+	dmg_effect.amount = weapon.weapon_power
+	skill.effects = [dmg_effect]
+	
+	return skill
+
+
+## Returns an array of SkillData representing ALL attacks from all weapon slots.
+func get_all_weapon_attacks_as_skills() -> Array[SkillData]:
+	var result: Array[SkillData] = []
+	if primary_weapon:
+		var saved_slot := active_weapon_slot
+		active_weapon_slot = "primary"
+		result.append(get_attack_as_skill())
+		active_weapon_slot = saved_slot
+	if secondary_weapon:
+		var saved_slot := active_weapon_slot
+		active_weapon_slot = "secondary"
+		result.append(get_attack_as_skill())
+		active_weapon_slot = saved_slot
+	return result
+
+
 func has_secondary_weapon() -> bool:
 	return secondary_weapon != null
 

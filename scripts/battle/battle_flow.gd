@@ -274,6 +274,11 @@ func try_attack_unit(target_unit: UnitBase) -> bool:
 	# Execute via SkillExecutor (unified path)
 	var skill_executor_node := %SkillExecutor as SkillExecutor
 	if not skill_executor_node:
+func execute_attack(attacker: UnitBase, target: UnitBase) -> bool:
+	var damage: int = attacker.get_total_attack_power()
+
+	# Validate attack (range, AP) without applying damage yet
+	if not combat_resolver.can_attack(attacker, target):
 		return false
 
 	# Spend AP

@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="EncounterData" format=3 uid="uid://dq8chp3hxplmc"]
+
+[ext_resource type="Script" uid="uid://cdjoedf3qgkn2" path="res://scripts/data/encounter_data.gd" id="1_enc"]
+[ext_resource type="Script" uid="uid://cm5j4x40fy4u2" path="res://scripts/data/encounter_spawn.gd" id="2_spawn"]
+[ext_resource type="Script" uid="uid://h1aayv4rm242" path="res://scripts/data/team_data.gd" id="3_team"]
+[ext_resource type="Resource" path="res://data/templates/assault.tres" id="4_player"]
+[ext_resource type="Resource" path="res://data/templates/assault_enemy.tres" id="5_enemy1"]
+[ext_resource type="Resource" path="res://data/templates/sniper_enemy.tres" id="6_enemy2"]
+
+[sub_resource type="Resource" id="spawn_player"]
+script = ExtResource("2_spawn")
+template = ExtResource("4_player")
+
+[sub_resource type="Resource" id="spawn_enemy1"]
+script = ExtResource("2_spawn")
+template = ExtResource("5_enemy1")
+q = 3
+
+[sub_resource type="Resource" id="spawn_enemy2"]
+script = ExtResource("2_spawn")
+template = ExtResource("6_enemy2")
+q = 3
+r = -2
+
+[sub_resource type="Resource" id="team_player"]
+script = ExtResource("3_team")
+team_id = "player"
+display_name = "Player Team"
+is_player = true
+
+[sub_resource type="Resource" id="team_enemy"]
+script = ExtResource("3_team")
+team_id = "enemy"
+display_name = "Enemy Team"
+outline_color = Color(1, 0.32, 0.24, 1)
+hp_bar_full_color = Color(1, 0.32, 0.24, 1)
+
+[resource]
+script = ExtResource("1_enc")
+encounter_id = "test_assault"
+display_name = "Test: Assault"
+description = "Test the Assault class. Defeat both enemies to win."
+grid_radius = 4
+teams = Array[ExtResource("3_team")]([SubResource("team_player"), SubResource("team_enemy")])
+spawns = Array[ExtResource("2_spawn")]([SubResource("spawn_player"), SubResource("spawn_enemy1"), SubResource("spawn_enemy2")])

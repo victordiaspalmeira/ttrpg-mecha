@@ -144,6 +144,66 @@ func play_skill_cinematic(
 		tween.tween_property(_camera_rig, "global_position", restore_pos, 0.35)
 
 
+## Plays a self-cast cinematic: close-up zoom → power surge particles → apply → restore.
+## Uses CameraRig.focus_close_up() for dramatic zoom with camera size reduction.
+func play_self_cast_cinematic(
+	caster: UnitBase,
+	primary_effect: int,
+	on_impact: Callable,
+	particle_manager: ParticleManager,
+) -> void:
+	var battle_hud := _get_battle_hud(caster)
+	if not battle_hud:
+		on_impact.call()
+		return
+
+	_camera = battle_hud.camera
+	_camera_rig = get_node("/root/BattleScene/World/CameraRig") as Node3D
+
+	if not _camera_rig:
+		push_warning("CinematicPlayer.play_self_cast_cinematic: _camera_rig is null, skipping zoom")
+		caster.play_attack_visual()
+		if particle_manager:
+			particle_manager.play_effect(primary_effect, caster.global_position + Vector3.UP * 0.05)
+		var vis := caster.get_node_or_null("UnitVisual") as UnitSpriteVisual
+		if vis:
+			vis.flash_white(0.35)
+		on_impact.call()
+		return
+
+	# Phase 1: Dramatic close-up zoom (0.35s)
+	if _camera_rig.has_method("focus_close_up"):
+		_camera_rig.focus_close_up(caster)
+	else:
+		push_warning("CameraRig has no focus_close_up method")
+
+	var caster_feet := caster.global_position + Vector3.UP * 0.05
+	var caster_body := caster.global_position + Vector3.UP * 0.5
+
+	# Phase 2: Wait 0.4s for camera tween, then play surge effects
+	await get_tree().create_timer(0.4).timeout
+
+	caster.play_attack_visual()
+	if particle_manager:
+		particle_manager.play_effect(primary_effect, caster_feet)
+		particle_manager.play_effect(ParticleConfig.EffectType.SKILL_BUFF_UP, caster_body)
+
+	# Phase 3: Wait 0.3s, then flash + apply effect
+	await get_tree().create_timer(0.3).timeout
+
+	var vis := caster.get_node_or_null("UnitVisual") as UnitSpriteVisual
+	if vis:
+		vis.flash_white(0.35)
+	on_impact.call()
+
+	# Phase 4: Wait 0.3s, then restore camera to normal zoom
+	await get_tree().create_timer(0.3).timeout
+
+	var turn_unit := _get_current_turn_unit(battle_hud)
+	if _camera_rig.has_method("restore_zoom"):
+		_camera_rig.restore_zoom(turn_unit)
+
+
 ## Returns the unit currently taking its turn.
 func _get_current_turn_unit(battle_hud: BattleHud) -> UnitBase:
 	if not battle_hud:
